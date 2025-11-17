@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugaad Bazaar</title>
+    
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Set Tailwind dark mode
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    
+    <style>
+        /* Apply the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple class to hide screens */
+        .screen {
+            display: none;
+        }
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151; /* dark:gray-700 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e0; /* gray-400 */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0; /* gray-500 */
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* dark:gray-600 */
+        }
+        
+        /* Ensure app container takes full height on small screens */
+        .app-container {
+            min-height: 80vh;
+        }
+        @media (max-height: 600px) {
+            .app-container {
+                min-height: 100vh;
+            }
+        }
+
+        /* Styles for Active Tabs */
+        .tab-btn.active {
+            border-bottom-color: #f97316; /* orange-600 */
+            color: #f97316; /* orange-600 */
+        }
+        .dark .tab-btn.active {
+            border-bottom-color: #fb923c; /* dark:orange-400 */
+            color: #fb923c; /* dark:orange-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-800 flex items-center justify-center min-h-screen p-4 transition-colors duration-200">
+
+    <!-- Main App Container -->
+    <!-- This container mimics a phone screen -->
+    <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden app-container flex flex-col">
+
+        <!-- Screen 0a: Login Screen -->
+        <div id="login-screen" class="screen p-8 flex flex-col items-center justify-center h-full relative" style="min-height: 80vh;">
+            <!-- Logo -->
+            <svg class="w-24 h-24 text-orange-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.36 12C15.8202 11.194 16 10.297 16 9.35185C16 6.39498 14.2091 4 12 4C9.79086 4 8 6.39498 8 9.35185C8 10.297 8.17981 11.194 8.64 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 14V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 17H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 19.5L10 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 19.5L14 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-4 text-center">Jugaad Bazaar</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mt-2 text-center">Welcome back!</p>
+
+            <div class="w-full space-y-4 mt-8">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="login-email" placeholder="student@college.edu" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <button id="login-btn" class="w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    Login
+                </button>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400">
+                    Don't have an account? 
+                    <button id="go-to-signup-btn" class="font-medium text-orange-600 dark:text-orange-400 hover:underline">Sign Up</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- Screen 0b: Sign Up Screen -->
+        <div id="signup-screen" class="screen p-8 flex flex-col items-center justify-center h-full relative" style="min-height: 80vh;">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">Create Account</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mt-2 text-center">Join the bazaar!</p>
+
+            <div class="w-full space-y-4 mt-8">
+                <div>
+                    <label for="signup-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                    <input type="text" id="signup-username" placeholder="e.g., CleverKrait" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label for="signup-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="signup-email" placeholder="student@college.edu" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label for="signup-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <input type="password" id="signup-password" placeholder="••••••••" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <button id="signup-btn" class="w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    Create Account
+                </button>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400">
+                    Already have an account? 
+                    <button id="go-to-login-btn" class="font-medium text-orange-600 dark:text-orange-400 hover:underline">Login</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- Screen 1: Home Screen -->
+        <div id="home-screen" class="screen p-8 flex flex-col items-center justify-center h-full relative" style="min-height: 80vh;">
+            
+            <!-- Settings Button -->
+            <button id="settings-btn" class="absolute top-4 left-4 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
+            
+            <!-- Dark Mode Toggle -->
+            <button id="dark-mode-toggle" class="absolute top-4 right-4 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+            
+            <!-- Logo -->
+            <svg class="w-24 h-24 text-orange-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.36 12C15.8202 11.194 16 10.297 16 9.35185C16 6.39498 14.2091 4 12 4C9.79086 4 8 6.39498 8 9.35185C8 10.297 8.17981 11.194 8.64 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 14V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 17H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 19.5L10 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 19.5L14 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-4 text-center">Jugaad Bazaar</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mt-2 text-center">Your campus micro-economy.</p>
+
+            <div class="flex flex-col w-full gap-4 mt-16">
+                <button id="hustle-btn" class="w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    <span class->💰 Hustle</span>
+                    <p class="text-sm text-orange-100">Find or post campus gigs</p>
+                </button>
+                <button id="trade-btn" class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <span class="text-lg">🔄 Trade</span>
+                    <p class="text-sm text-blue-100">Buy & sell notes, books, etc.</p>
+                </button>
+                <button id="chat-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    <span class="text-lg">💬 Campus Chat</span>
+                    <p class="text-sm text-green-100">Chat anonymously with nearby users</p>
+                </button>
+                <button id="activity-btn" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    <span class="text-lg">🔔 My Activity</span>
+                    <p class="text-sm text-gray-100">View your trade requests & friends</p>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Screen 2: Hustle Page -->
+        <div id="hustle-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Hustle Feed</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Hustle Feed (Scrollable) -->
+            <div id="hustle-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                <!-- Hustle cards will be dynamically added here -->
+                <p id="no-hustles" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No hustles posted yet. Be the first!</p>
+            </div>
+            
+            <!-- Post New Hustle Button -->
+            <button id="post-hustle-btn" class="absolute bottom-6 right-6 bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 z-20">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Screen 3: Trade Page -->
+        <div id="trade-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Trade Feed</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Trade Feed (Scrollable) -->
+            <div id="trade-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 grid grid-cols-2 gap-4">
+                <!-- Trade cards will be dynamically added here -->
+                <p id="no-trades" class="text-gray-500 dark:text-gray-400 text-center p-4 col-span-2 hidden">No items for trade yet. Be the first!</p>
+            </div>
+            
+            <!-- Post New Trade Button -->
+            <button id="post-trade-btn" class="absolute bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 z-20">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Screen 4: Campus Chat Page (Replaces Map) -->
+        <div id="chat-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Campus Chat</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Chat Message Feed (Scrollable) -->
+            <div id="chat-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                <!-- Chat messages will be dynamically added here -->
+                <p id="no-chats" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No chats yet. Say something!</p>
+            </div>
+            
+            <!-- Message Input (Sticky Footer) -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center space-x-2">
+                <input id="chat-message-input" type="text" placeholder="Broadcast a message..." class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <button id="chat-send-btn" class="bg-green-600 text-white p-2 rounded-lg shadow-md hover:bg-green-700">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.875L6 12z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Screen 5: New Hustle Form -->
+        <div id="new-hustle-form" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="hustle-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Hustle</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Form -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+                <div>
+                    <label for="hustle-subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subject / Title</label>
+                    <input type="text" id="hustle-subject" placeholder="e.g., Need C++ Tutor" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label for="hustle-desc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                    <textarea id="hustle-desc" rows="4" placeholder="e.g., Stuck on my data structures lab. Need help for 1 hour. Will pay ₹150." class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+                <div>
+                    <label for="hustle-contact" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info (Phone, Email, etc.)</label>
+                    <input type="text" id="hustle-contact" placeholder="e.g., DM me @..." class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+            </div>
+            
+            <!-- Post Button (Sticky Footer) -->
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                <button id="save-hustle-btn" class="w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    Post Hustle
+                </button>
+            </div>
+        </div>
+        
+        <!-- Screen 6: New Trade Form -->
+        <div id="new-trade-form" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="trade-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Item</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Form -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+                
+                <!-- Image Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Photo</label>
+                    <img id="trade-image-preview" src="https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview" alt="Image Preview" class="mt-2 w-full h-48 object-cover rounded-lg bg-gray-200 dark:bg-gray-700">
+                    <input type="file" id="trade-image-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-800">
+                </div>
+                
+                <div>
+                    <label for="trade-subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Item Name / Title</label>
+                    <input type="text" id="trade-subject" placeholder="e.g., Physics 101 Textbook" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="trade-desc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description / Price</label>
+                    <textarea id="trade-desc" rows="3" placeholder="e.g., Like new, no highlighting. ₹400 or will trade for Chemistry notes." class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label for="trade-contact" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Contact Info (Private)</label>
+                    <input type="text" id="trade-contact" placeholder="e.g., Room 201, Hostel B (Only shared on accept)" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <!-- Post Button (Sticky Footer) -->
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                <button id="save-trade-btn" class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Post Item
+                </button>
+            </div>
+        </div>
+        
+        <!-- Screen 7: My Activity Page -->
+        <div id="activity-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">My Activity</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button id="trade-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="trade-requests-tab">
+                    Trade Requests
+                </button>
+                <button id="friends-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friends-tab">
+                    Friends
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+                <!-- Trade Requests Tab -->
+                <div id="trade-requests-tab" class="tab-content space-y-4">
+                    <!-- Trade requests will be dynamically added here -->
+                    <p id="no-trade-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No trade requests sent yet.</p>
+                </div>
+                <!-- Friends Tab -->
+                <div id="friends-tab" class="tab-content space-y-4 hidden">
+                    <!-- Friends will be dynamically added here -->
+                    <p id="no-friends" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No friends added yet. Add friends from Campus Chat!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screen 8: DM Page (Simulated) -->
+        <div id="dm-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="activity-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 id="dm-header-name" class="text-xl font-bold text-gray-900 dark:text-gray-100">DM with...</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- DM Feed (Scrollable) -->
+            <div id="dm-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                <!-- DM messages will be dynamically added here -->
+            </div>
+            
+            <!-- Message Input (Sticky Footer) -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center space-x-2">
+                <input id="dm-message-input" type="text" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="dm-send-btn" class="bg-blue-600 text-white p-2 rounded-lg shadow-md hover:bg-blue-700">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.875L6 12z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal for "Add Friend" -->
+        <div id="add-friend-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
+                <h3 id="add-friend-name" class="text-xl font-bold text-gray-900 dark:text-gray-100">Send Friend Request?</h3>
+                <p class="mt-2 text-gray-600 dark:text-gray-300">Do you want to send a friend request to <span id="friend-modal-name" class="font-semibold">...</span>? You can DM them if they accept.</p>
+                <div class="flex gap-4 mt-4">
+                    <button id="cancel-friend-btn" class="w-full bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                    <button id="confirm-friend-btn" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Send Request</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 9: Settings Page -->
+        <div id="settings-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Settings</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Form -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+                <div>
+                    <label for="username-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Username</label>
+                    <input type="text" id="username-input" placeholder="e.g., CleverKrait" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">This name will be shown with "You" in public chats (e.g., "You (CleverKrait)").</p>
+                </div>
+            </div>
+            
+            <!-- Footer Buttons -->
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                <button id="save-username-btn" class="w-full bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    Save Username
+                </button>
+                <button id="logout-btn" class="w-full bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Toast Notification -->
+        <div id="toast-notification" class="absolute top-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
+            <p id="toast-message"></p>
+        </div>
+
+    </div>
+
+    <!-- 
+      NEW: FIREBASE SDKs
+      These scripts import the code needed to talk to Firebase.
+    -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getDatabase, 
+            ref, 
+            push, 
+            onValue, 
+            set, 
+            get 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        
+        // --- 1. FIREBASE CONFIG ---
+        // I have pasted your full config here.
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKFQ1wKqErzZ4oOli9f6D5MN_AuI6FvQs",
+            authDomain: "jugaad-bazaar.firebaseapp.com",
+            databaseURL: "https://jugaad-bazaar-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "jugaad-bazaar",
+            storageBucket: "jugaad-bazaar.firebasestorage.app",
+            messagingSenderId: "381545822754",
+            appId: "1:381545822754:web:1edc2b8be8af5724aaa87b",
+            measurementId: "G-YE8GHY2V69"
+        };
+        // --- END OF CONFIG ---
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+
+        // --- User's State ---
+        let myUsername = "Anonymous Panda"; // Default name
+        let myUid = null; // User's unique ID
+        let myTradeRequests = []; // Stores { id, subject, status, contact, image }
+        let myFriendsList = []; // Stores { name, status, dms: [] }
+        
+        // --- Local Arrays (cleared on render) ---
+        // These are no longer the "source of truth". The database is.
+        let hustleDatabase = [];
+        let tradeDatabase = [];
+        let chatMessages = [];
+        
+        // --- DOM ELEMENTS ---
+        const allScreens = document.querySelectorAll('.screen');
+        
+        // Auth Screens
+        const loginScreen = document.getElementById('login-screen');
+        const signupScreen = document.getElementById('signup-screen');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const goToSignupBtn = document.getElementById('go-to-signup-btn');
+        const goToLoginBtn = document.getElementById('go-to-login-btn');
+        const signupUsername = document.getElementById('signup-username');
+        const loginEmail = document.getElementById('login-email');
+        const loginPassword = document.getElementById('login-password');
+        const signupEmail = document.getElementById('signup-email');
+        const signupPassword = document.getElementById('signup-password');
+
+        const homeScreen = document.getElementById('home-screen');
+        
+        // Feed Screens
+        const hustleScreen = document.getElementById('hustle-screen');
+        const tradeScreen = document.getElementById('trade-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        
+        // Form Screens
+        const newHustleForm = document.getElementById('new-hustle-form');
+        const newTradeForm = document.getElementById('new-trade-form');
+        const settingsScreen = document.getElementById('settings-screen');
+        
+        // Feed Containers
+        const hustleFeed = document.getElementById('hustle-feed');
+        const tradeFeed = document.getElementById('trade-feed');
+        const chatFeed = document.getElementById('chat-feed');
+        
+        // Home Buttons
+        const hustleBtn = document.getElementById('hustle-btn');
+        const tradeBtn = document.getElementById('trade-btn');
+        const chatBtn = document.getElementById('chat-btn');
+        const activityBtn = document.getElementById('activity-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        // "Post New" Buttons
+        const postHustleBtn = document.getElementById('post-hustle-btn');
+        const postTradeBtn = document.getElementById('post-trade-btn');
+        
+        // Form Save Buttons
+        const saveHustleBtn = document.getElementById('save-hustle-btn');
+        const saveTradeBtn = document.getElementById('save-trade-btn');
+        const saveUsernameBtn = document.getElementById('save-username-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        // Back Buttons
+        const backBtns = document.querySelectorAll('.back-btn');
+        
+        // Chat UI
+        const chatMessageInput = document.getElementById('chat-message-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        
+        // Trade Form Image
+        const tradeImageUpload = document.getElementById('trade-image-upload');
+        const tradeImagePreview = document.getElementById('trade-image-preview');
+        
+        // Dark Mode
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        
+        // Modals
+        const addFriendModal = document.getElementById('add-friend-modal');
+        const friendModalName = document.getElementById('friend-modal-name');
+        const cancelFriendBtn = document.getElementById('cancel-friend-btn');
+        const confirmFriendBtn = document.getElementById('confirm-friend-btn');
+        
+        // Form Inputs
+        const hustleSubject = document.getElementById('hustle-subject');
+        const hustleDesc = document.getElementById('hustle-desc');
+        const hustleContact = document.getElementById('hustle-contact');
+        const tradeSubject = document.getElementById('trade-subject');
+        const tradeDesc = document.getElementById('trade-desc');
+        const tradeContact = document.getElementById('trade-contact');
+        const usernameInput = document.getElementById('username-input');
+        let tradeImageBase64 = null; // To store image data
+
+        // Activity Screen
+        const activityScreen = document.getElementById('activity-screen');
+        const tradeRequestsTabBtn = document.getElementById('trade-requests-tab-btn');
+        const friendsTabBtn = document.getElementById('friends-tab-btn');
+        const tradeRequestsTab = document.getElementById('trade-requests-tab');
+        const friendsTab = document.getElementById('friends-tab');
+        const noTradeRequests = document.getElementById('no-trade-requests');
+        const noFriends = document.getElementById('no-friends');
+        
+        // DM Screen
+        const dmScreen = document.getElementById('dm-screen');
+        const dmHeaderName = document.getElementById('dm-header-name');
+        const dmFeed = document.getElementById('dm-feed');
+        const dmMessageInput = document.getElementById('dm-message-input');
+        const dmSendBtn = document.getElementById('dm-send-btn');
+
+        // Toast Notification
+        const toastNotification = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Empty state messages
+        const noHustles = document.getElementById('no-hustles');
+        const noTrades = document.getElementById('no-trades');
+        const noChats = document.getElementById('no-chats');
+
+        // --- Core Functions ---
+        
+        function showScreen(screenId) {
+            allScreens.forEach(screen => screen.style.display = 'none');
+            const screenElement = document.getElementById(screenId);
+            screenElement.style.display = 'flex';
+            screenElement.style.flexDirection = 'column';
+            if (screenId === 'home-screen' || screenId === 'login-screen' || screenId === 'signup-screen') {
+                screenElement.style.justifyContent = 'center';
+            }
+            if (screenId === 'activity-screen') {
+                showActivityTab('trade-requests-tab');
+            }
+            if (screenId === 'settings-screen') {
+                usernameInput.value = myUsername;
+            }
+        }
+
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            toastNotification.classList.remove('hidden', 'bg-green-600', 'bg-red-600');
+            toastNotification.classList.add(isError ? 'bg-red-600' : 'bg-green-600');
+            
+            setTimeout(() => {
+                toastNotification.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // --- Render Functions (NOW LIVE!) ---
+        
+        function renderHustleFeed() {
+            hustleFeed.innerHTML = ''; // Clear feed
+            if (hustleDatabase.length === 0) {
+                noHustles.classList.remove('hidden');
+            } else {
+                noHustles.classList.add('hidden');
+                // Render in reverse order (newest first)
+                hustleDatabase.slice().reverse().forEach(hustle => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-2';
+                    card.innerHTML = `
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${hustle.subject}</h3>
+                        <p class="text-gray-700 dark:text-gray-300">${hustle.desc}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Contact: ${hustle.contact}</p>
+                        <button class="contact-btn w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600" data-uid="${hustle.uid}" data-contact="${hustle.contact}">I'll do it!</button>
+                    `;
+                    hustleFeed.appendChild(card);
+                });
+            }
+        }
+        
+        function renderTradeFeed() {
+            tradeFeed.innerHTML = ''; // Clear feed
+            if (tradeDatabase.length === 0) {
+                noTrades.classList.remove('hidden');
+            } else {
+                noTrades.classList.add('hidden');
+                tradeDatabase.slice().reverse().forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col';
+                    const existingRequest = myTradeRequests.find(req => req.id === item.id);
+                    const buttonDisabled = existingRequest || item.uid === myUid ? 'disabled' : '';
+                    let buttonText = 'Send Request';
+                    if (existingRequest) buttonText = 'Request Sent';
+                    if (item.uid === myUid) buttonText = 'Your Item';
+                    
+                    card.innerHTML = `
+                        <img src="${item.image}" alt="${item.subject}" class="w-full h-32 object-cover">
+                        <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${item.subject}</h3>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">${item.desc}</p>
+                            </div>
+                            <button class="trade-request-btn w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 mt-2 ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                    data-id="${item.id}" 
+                                    data-subject="${item.subject}" 
+                                    data-contact="${item.contact}" 
+                                    data-image="${item.image}"
+                                    data-owner-uid="${item.uid}"
+                                    ${buttonDisabled}>
+                                ${buttonText}
+                            </button>
+                        </div>
+                    `;
+                    tradeFeed.appendChild(card);
+                });
+            }
+        }
+        
+        function renderChatFeed() {
+            if (chatMessages.length === 0) {
+                chatFeed.innerHTML = '';
+                noChats.classList.remove('hidden');
+                return;
+            }
+            
+            noChats.classList.add('hidden');
+            chatFeed.innerHTML = ''; // Clear feed
+            
+            chatMessages.forEach(msg => {
+                const bubble = document.createElement('div');
+                let justify = 'justify-start';
+                let colors = 'bg-gray-100 dark:bg-gray-700';
+                
+                // Use UID to check if it's the user's message
+                if (msg.uid === myUid) {
+                    justify = 'justify-end';
+                    colors = 'bg-green-100 dark:bg-green-800';
+                }
+                
+                bubble.className = `flex ${justify}`;
+                bubble.innerHTML = `
+                    <div class="${colors} p-3 rounded-lg max-w-xs">
+                        <p class="text-sm text-gray-800 dark:text-gray-200">${msg.message}</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 font-medium text-right cursor-pointer add-friend-btn" data-name="${msg.username}" data-uid="${msg.uid}">
+                            ${msg.uid === myUid ? `You (${msg.username})` : msg.username}
+                        </p>
+                    </div>
+                `;
+                chatFeed.appendChild(bubble);
+            });
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+        }
+
+        function renderActivityScreen() {
+            renderTradeRequests();
+            renderFriendsList();
+        }
+        
+        function renderTradeRequests() {
+            tradeRequestsTab.innerHTML = '';
+            if (myTradeRequests.length === 0) {
+                noTradeRequests.classList.remove('hidden');
+                return;
+            }
+            noTradeRequests.classList.add('hidden');
+            
+            myTradeRequests.forEach((req, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center space-x-4';
+                card.innerHTML = `
+                    <img src="${req.image}" alt="${req.subject}" class="w-16 h-16 object-cover rounded-lg">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.subject}</h3>
+                        <p id="status-trade-${index}" class="text-sm ${req.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}">
+                            ${req.status === 'pending' ? 'Pending Approval...' : `Accepted! Contact: ${req.contact}`}
+                        </p>
+                    </div>
+                `;
+                tradeRequestsTab.appendChild(card);
+            });
+        }
+        
+        function renderFriendsList() {
+            friendsTab.innerHTML = '';
+            if (myFriendsList.length === 0) {
+                noFriends.classList.remove('hidden');
+                return;
+            }
+            noFriends.classList.add('hidden');
+            
+            myFriendsList.forEach((friend, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
+                card.innerHTML = `
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${friend.name}</h3>
+                        <p id="status-friend-${index}" class="text-sm ${friend.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-6D00 dark:text-green-400'}">
+                            ${friend.status}
+                        </p>
+                    </div>
+                    <button class="dm-btn bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg ${friend.status === 'pending' ? 'hidden' : ''}" data-name="${friend.name}" data-friend-uid="${friend.uid}">
+                        DM
+                    </button>
+                `;
+                friendsTab.appendChild(card);
+            });
+        }
+        
+        // --- Form Handling (NOW LIVE!) ---
+        
+        saveHustleBtn.addEventListener('click', () => {
+            const subject = hustleSubject.value;
+            const desc = hustleDesc.value;
+            const contact = hustleContact.value;
+            
+            if (!subject || !desc || !contact) {
+                showToast("All fields are required.", true);
+                return;
+            }
+            
+            const newHustle = {
+                uid: myUid,
+                username: myUsername,
+                subject: subject,
+                desc: desc,
+                contact: contact,
+                createdAt: Date.now()
+            };
+            
+            // Push to Firebase
+            push(ref(db, 'hustles'), newHustle)
+                .then(() => {
+                    showToast("Hustle posted!");
+                    showScreen('hustle-screen');
+                    hustleSubject.value = '';
+                    hustleDesc.value = '';
+                    hustleContact.value = '';
+                })
+                .catch(err => showToast(err.message, true));
+        });
+        
+        saveTradeBtn.addEventListener('click', () => {
+            const subject = tradeSubject.value;
+            const desc = tradeDesc.value;
+            const contact = tradeContact.value;
+            
+            if (!subject || !desc || !contact || !tradeImageBase64) {
+                showToast("All fields and an image are required.", true);
+                return;
+            }
+            
+            const newTrade = {
+                id: `trade${Date.now()}`, // Use timestamp for a unique-ish ID
+                uid: myUid,
+                username: myUsername,
+                subject: subject,
+                desc: desc,
+                contact: contact,
+                image: tradeImagePreview.src, // Save the base64 string
+                createdAt: Date.now()
+            };
+
+            // Push to Firebase
+            push(ref(db, 'trades'), newTrade)
+                .then(() => {
+                    showToast("Item posted!");
+                    showScreen('trade-screen');
+                    tradeSubject.value = '';
+                    tradeDesc.value = '';
+                    tradeContact.value = '';
+                    tradeImagePreview.src = 'https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview';
+                    tradeImageUpload.value = null;
+                    tradeImageBase64 = null;
+                })
+                .catch(err => showToast(err.message, true));
+        });
+        
+        tradeImageUpload.addEventListener('change', () => {
+            const file = tradeImageUpload.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    tradeImagePreview.src = e.target.result;
+                    tradeImageBase64 = e.target.result.split(',')[1];
+                }
+                reader.readAsDataURL(file);
+            } else {
+                tradeImageBase64 = null;
+            }
+        });
+        
+        chatSendBtn.addEventListener('click', () => {
+            const message = chatMessageInput.value;
+            if (!message) return;
+            
+            const newMsg = {
+                uid: myUid,
+                username: myUsername,
+                message: message,
+                createdAt: Date.now()
+            };
+            
+            // Push to Firebase
+            push(ref(db, 'chats'), newMsg)
+                .then(() => {
+                    chatMessageInput.value = ''; // Clear input
+                })
+                .catch(err => showToast(err.message, true));
+        });
+
+        dmSendBtn.addEventListener('click', () => {
+            const message = dmMessageInput.value;
+            const friendName = dmHeaderName.textContent.replace('DM with ', '');
+            if (!message || !friendName) return;
+            
+            // This logic needs to be fully built out with a real DM structure in Firebase
+            // For this prototype, we'll just show the message locally
+            const friend = myFriendsList.find(f => f.name === friendName);
+            if (friend) {
+                const newMsg = { user: "Me", message };
+                friend.dms.push(newMsg);
+                renderDMScreen(friend); // Re-render local DM screen
+            }
+            dmMessageInput.value = '';
+            showToast("DM sending not fully wired up in this prototype.", true);
+        });
+        
+        // --- Navigation ---
+        
+        hustleBtn.addEventListener('click', () => {
+            showScreen('hustle-screen');
+        });
+        
+        tradeBtn.addEventListener('click', () => {
+            showScreen('trade-screen');
+        });
+        
+        chatBtn.addEventListener('click', () => {
+            showScreen('chat-screen');
+        });
+
+        activityBtn.addEventListener('click', () => {
+            renderActivityScreen();
+            showScreen('activity-screen');
+        });
+        
+        settingsBtn.addEventListener('click', () => {
+            usernameInput.value = myUsername;
+            showScreen('settings-screen');
+        });
+        
+        postHustleBtn.addEventListener('click', () => showScreen('new-hustle-form'));
+        postTradeBtn.addEventListener('click', () => showScreen('new-trade-form'));
+        
+        backBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                showScreen(btn.dataset.target);
+            });
+        });
+
+        tradeRequestsTabBtn.addEventListener('click', () => showActivityTab('trade-requests-tab'));
+        friendsTabBtn.addEventListener('click', () => showActivityTab('friends-tab'));
+        
+        function showActivityTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId + '-btn').classList.add('active');
+        }
+
+        function renderDMScreen(friend) {
+            dmHeaderName.textContent = `DM with ${friend.name}`;
+            dmFeed.innerHTML = '';
+
+            if (friend.dms.length === 0) {
+                friend.dms.push({ user: friend.name, message: "Hey! What's up?" });
+            }
+
+            friend.dms.forEach(msg => {
+                const bubble = document.createElement('div');
+                let justify = 'justify-start';
+                let colors = 'bg-gray-100 dark:bg-gray-700';
+                
+                if (msg.user === 'Me') {
+                    justify = 'justify-end';
+                    colors = 'bg-blue-100 dark:bg-blue-800';
+                }
+                
+                bubble.className = `flex ${justify}`;
+                bubble.innerHTML = `
+                    <div class="${colors} p-3 rounded-lg max-w-xs">
+                        <p class="text-sm text-gray-800 dark:text-gray-200">${msg.message}</p>
+                    </div>
+                `;
+                dmFeed.appendChild(bubble);
+            });
+            dmFeed.scrollTop = dmFeed.scrollHeight;
+        }
+        
+        // --- Modal Logic (Now with Firebase logic) ---
+        
+        hustleFeed.addEventListener('click', (e) => {
+            if (e.target.classList.contains('contact-btn')) {
+                const ownerUid = e.target.dataset.uid;
+                if (ownerUid === myUid) {
+                    showToast("This is your own post!", true);
+                    return;
+                }
+                // In a real app, this would start a DM.
+                // For now, we just show the contact info.
+                const contactInfo = e.target.dataset.contact;
+                showToast(`Contact: ${contactInfo}`);
+                e.target.textContent = "Contacted!";
+                e.target.disabled = true;
+                e.target.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+        
+        tradeFeed.addEventListener('click', (e) => {
+            if (e.target.classList.contains('trade-request-btn')) {
+                const btn = e.target;
+                const req = {
+                    id: btn.dataset.id,
+                    subject: btn.dataset.subject,
+                    contact: btn.dataset.contact,
+                    image: btn.dataset.image,
+                    status: 'pending', // 'pending'
+                    ownerUid: btn.dataset.ownerUid,
+                    requesterUid: myUid
+                };
+                
+                // This is a complex operation:
+                // 1. Save this request to the *owner's* "received_requests"
+                // 2. Save this request to *my* "sent_requests"
+                // This is too complex for this prototype, so we'll just save to our local state.
+                myTradeRequests.push(req);
+                renderActivityScreen(); // Re-render activity
+                showToast("Request Sent! Check 'My Activity'");
+                btn.textContent = "Request Sent";
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        chatFeed.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-friend-btn')) {
+                const name = e.target.dataset.name;
+                const friendUid = e.target.dataset.uid;
+                
+                if (friendUid === myUid) return; // Can't add yourself
+                
+                if (myFriendsList.find(f => f.uid === friendUid)) {
+                    showToast("You're already friends!");
+                    return;
+                }
+                
+                friendModalName.textContent = name;
+                confirmFriendBtn.dataset.name = name;
+                confirmFriendBtn.dataset.uid = friendUid;
+                addFriendModal.classList.remove('hidden');
+            }
+        });
+        
+        cancelFriendBtn.addEventListener('click', () => addFriendModal.classList.add('hidden'));
+        
+        confirmFriendBtn.addEventListener('click', () => {
+            const name = confirmFriendBtn.dataset.name;
+            const friendUid = confirmFriendBtn.dataset.uid;
+            
+            // This is also complex. In a real app:
+            // 1. Write to `users/${myUid}/friends/${friendUid}` { status: 'pending_sent' }
+            // 2. Write to `users/${friendUid}/friends/${myUid}` { status: 'pending_received' }
+            // For now, we just add to our local list.
+            myFriendsList.push({ uid: friendUid, name: name, status: 'pending', dms: [] });
+            renderActivityScreen();
+            addFriendModal.classList.add('hidden');
+            showToast("Friend Request Sent!");
+        });
+        
+        friendsTab.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dm-btn')) {
+                const name = e.target.dataset.name;
+                const friend = myFriendsList.find(f => f.name === name);
+                if (friend) {
+                    renderDMScreen(friend);
+                    showScreen('dm-screen');
+                }
+            }
+        });
+
+        // --- Dark Mode ---
+        
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', isDark);
+            updateIcons(isDark);
+        }
+        
+        function updateIcons(isDark) {
+            sunIcon.style.display = isDark ? 'block' : 'none';
+            moonIcon.style.display = isDark ? 'none' : 'block';
+        }
+        
+        function applyInitialDarkMode() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+            updateIcons(isDark);
+        }
+        
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        
+        // --- Auth Functions (NOW LIVE!) ---
+        
+        loginBtn.addEventListener('click', () => {
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            if (!email || !password) return showToast("Please enter email and password.", true);
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    showToast("Login Successful!");
+                    // onAuthStateChanged will handle the rest
+                })
+                .catch((error) => showToast(error.message, true));
+        });
+        
+        goToSignupBtn.addEventListener('click', () => showScreen('signup-screen'));
+        goToLoginBtn.addEventListener('click', () => showScreen('login-screen'));
+        
+        signupBtn.addEventListener('click', () => {
+            const username = signupUsername.value.trim();
+            const email = signupEmail.value;
+            const password = signupPassword.value;
+
+            if (!username || !email || !password) {
+                return showToast("All fields are required.", true);
+            }
+            if (username.length < 3) {
+                return showToast("Username must be at least 3 characters.", true);
+            }
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    // Save the username to the database
+                    set(ref(db, 'users/' + user.uid), {
+                        username: username
+                    }).then(() => {
+                        showToast("Account created successfully!");
+                        // onAuthStateChanged will handle the rest
+                    });
+                })
+                .catch((error) => showToast(error.message, true));
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).catch((error) => showToast(error.message, true));
+        });
+
+        saveUsernameBtn.addEventListener('click', () => {
+            const newName = usernameInput.value.trim();
+            if (newName && newName.length > 2 && myUid) {
+                // Save new username to database
+                set(ref(db, 'users/' + myUid), {
+                    username: newName
+                }).then(() => {
+                    myUsername = newName;
+                    showToast("Username saved!");
+                    showScreen('home-screen');
+                }).catch(err => showToast(err.message, true));
+            } else {
+                showToast("Username must be at least 3 characters.", true);
+            }
+        });
+        
+        // --- Get Random Name Function ---
+        function getRandomName() {
+            const randomNames = ["Panda", "Koala", "Wombat", "Krait", "Quokka", "Gecko", "Mongoose", "Civet"];
+            return `Anonymous ${randomNames[Math.floor(Math.random() * randomNames.length)]}`;
+        }
+        
+        // --- REAL-TIME LISTENERS ---
+        function loadAppData(uid) {
+            myUid = uid;
+            
+            // 1. Get user's profile (username)
+            get(ref(db, 'users/' + uid)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    myUsername = snapshot.val().username;
+                } else {
+                    // This case might happen if signup fails to set username
+                    myUsername = getRandomName();
+                }
+            });
+            
+            // 2. Listen for new Hustles
+            onValue(ref(db, 'hustles'), (snapshot) => {
+                const data = snapshot.val();
+                hustleDatabase = data ? Object.values(data) : [];
+                renderHustleFeed();
+            });
+            
+            // 3. Listen for new Trades
+            onValue(ref(db, 'trades'), (snapshot) => {
+                const data = snapshot.val();
+                tradeDatabase = data ? Object.values(data) : [];
+                renderTradeFeed();
+            });
+            
+            // 4. Listen for new Chats
+            onValue(ref(db, 'chats'), (snapshot) => {
+                const data = snapshot.val();
+                chatMessages = data ? Object.values(data) : [];
+                renderChatFeed();
+            });
+            
+            // 5. Listen for user's own data (friends, requests)
+            // This is where you would load `myFriendsList` and `myTradeRequests`
+            // For now, we'll keep them local to the prototype.
+            renderActivityScreen();
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            applyInitialDarkMode(); // Check for saved dark mode preference
+            
+            // Check login status
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User is signed in
+                    loadAppData(user.uid);
+                    showScreen('home-screen');
+                } else {
+                    // User is signed out
+                    myUid = null;
+                    myUsername = getRandomName();
+                    showScreen('login-screen');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
