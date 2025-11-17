@@ -371,7 +371,7 @@
         <!-- Screen 7: My Activity Page -->
         <div id="activity-screen" class="screen flex flex-col h-full">
             <!-- Header -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 relative">
                 <div class="flex justify-between items-center">
                     <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
                         <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -379,21 +379,25 @@
                         </svg>
                     </button>
                     <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">My Activity</h2>
-                    <span class="w-8"></span> <!-- Spacer -->
+                    <!-- NEW: Add Friend by Username Button -->
+                    <button id="show-add-friend-modal-btn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             
             <!-- Tab Navigation -->
             <div class="flex border-b border-gray-200 dark:border-gray-700">
                 <button id="trade-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="trade-requests-tab">
-                    Trade Requests
+                    Trades
                 </button>
-                <!-- NEW: Friend Requests Tab -->
                 <button id="friend-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-requests-tab">
-                    Friend Requests
+                    Requests
                 </button>
                 <button id="friend-list-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-list-tab">
-                    Friend List
+                    Friends
                 </button>
             </div>
             
@@ -448,7 +452,7 @@
             </div>
         </div>
 
-        <!-- Modal for "Add Friend" -->
+        <!-- Modal for "Add Friend" (from Chat) -->
         <div id="add-friend-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
                 <h3 id="add-friend-name" class="text-xl font-bold text-gray-900 dark:text-gray-100">Send Friend Request?</h3>
@@ -459,8 +463,20 @@
                 </div>
             </div>
         </div>
+        
+        <!-- NEW: Modal for "Add Friend by Username" -->
+        <div id="add-friend-username-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add Friend by Username</h3>
+                <input type="text" id="username-search-input" placeholder="Enter exact username..." class="mt-4 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <div class="flex gap-4 mt-4">
+                    <button id="cancel-add-by-username-btn" class="w-full bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                    <button id="send-friend-request-by-username-btn" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Send Request</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- NEW: Modal for "Delete Post" -->
+        <!-- Modal for "Delete Post" -->
         <div id="delete-confirm-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Are you sure?</h3>
@@ -527,7 +543,10 @@
             onValue, 
             set, 
             get,
-            remove
+            remove,
+            query, 
+            orderByChild, 
+            equalTo 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { 
             getAuth, 
@@ -536,7 +555,7 @@
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        // NEW: Import Storage SDK
+        // Import Storage SDK
         import { 
             getStorage, 
             ref as storageRef, // Use 'as' to avoid conflict with db ref
@@ -571,6 +590,7 @@
         let myTradeRequests = []; // Stores { id, subject, status, contact, image }
         let myFriendList = []; // RENAMED
         let myReceivedFriendRequests = []; // NEW
+        let mySentFriendRequests = []; // NEW: To track sent requests
         
         // --- Local Arrays (cleared on render) ---
         let hustleDatabase = [];
@@ -658,6 +678,13 @@
         const deleteConfirmModal = document.getElementById('delete-confirm-modal');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        
+        // NEW: Add Friend by Username Modal
+        const addFriendUsernameModal = document.getElementById('add-friend-username-modal');
+        const showAddFriendModalBtn = document.getElementById('show-add-friend-modal-btn');
+        const cancelAddByUsernameBtn = document.getElementById('cancel-add-by-username-btn');
+        const sendFriendRequestByUsernameBtn = document.getElementById('send-friend-request-by-username-btn');
+        const usernameSearchInput = document.getElementById('username-search-input');
         
         // Form Inputs
         const hustleSubject = document.getElementById('hustle-subject');
@@ -921,12 +948,12 @@
                 card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
                 card.innerHTML = `
                     <div>
-                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.name}</h3>
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.fromUsername}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Wants to be your friend.</p>
                     </div>
                     <div class="flex gap-2">
-                        <button class="accept-friend-btn w-full bg-green-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-600" data-uid="${req.uid}" data-name="${req.name}">Accept</button>
-                        <button class="decline-friend-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-uid="${req.uid}">Decline</button>
+                        <button class="accept-friend-btn w-full bg-green-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-600" data-uid="${req.fromUid}" data-name="${req.fromUsername}">Accept</button>
+                        <button class="decline-friend-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-uid="${req.fromUid}">Decline</button>
                     </div>
                 `;
                 friendRequestsTab.appendChild(card);
@@ -935,13 +962,15 @@
         
         function renderFriendList() {
             friendsTab.innerHTML = '';
-            if (myFriendList.length === 0) {
+            const allFriends = [...myFriendList, ...mySentFriendRequests]; // Combine lists
+            
+            if (allFriends.length === 0) {
                 noFriends.classList.remove('hidden');
                 return;
             }
             noFriends.classList.add('hidden');
             
-            myFriendList.forEach((friend, index) => {
+            allFriends.forEach((friend, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
                 
@@ -954,12 +983,12 @@
 
                 card.innerHTML = `
                     <div>
-                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${friend.name}</h3>
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${friend.username}</h3>
                         <p id="status-friend-${index}" class="text-sm ${statusColor}">
                             ${statusText}
                         </p>
                     </div>
-                    <button class="dm-btn bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg ${friend.status !== 'accepted' ? 'hidden' : ''}" data-name="${friend.name}" data-friend-uid="${friend.uid}">
+                    <button class="dm-btn bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg ${friend.status !== 'accepted' ? 'hidden' : ''}" data-name="${friend.username}" data-friend-uid="${friend.uid}">
                         DM
                     </button>
                 `;
@@ -1130,6 +1159,7 @@
             const friend = myFriendList.find(f => f.name === friendName);
             if (friend) {
                 const newMsg = { user: "Me", message };
+                if (!friend.dms) friend.dms = [];
                 friend.dms.push(newMsg);
                 renderDMScreen(friend); // Re-render local DM screen
             }
@@ -1191,11 +1221,13 @@
         }
 
         function renderDMScreen(friend) {
-            dmHeaderName.textContent = `DM with ${friend.name}`;
+            dmHeaderName.textContent = `DM with ${friend.username}`;
             dmFeed.innerHTML = '';
+            
+            if (!friend.dms) friend.dms = [];
 
             if (friend.dms.length === 0) {
-                friend.dms.push({ user: friend.name, message: "Hey! What's up?" });
+                friend.dms.push({ user: friend.username, message: "Hey! What's up?" });
             }
 
             friend.dms.forEach(msg => {
@@ -1345,7 +1377,7 @@
                 const friendUid = e.target.dataset.uid;
                 
                 if (friendUid === myUid) return;
-                if (myFriendList.find(f => f.uid === friendUid)) {
+                if (myFriendList.find(f => f.uid === friendUid) || mySentFriendRequests.find(f => f.uid === friendUid)) {
                     showToast("You're already friends or request is sent!");
                     return;
                 }
@@ -1362,39 +1394,113 @@
         confirmFriendBtn.addEventListener('click', () => {
             const name = confirmFriendBtn.dataset.name;
             const friendUid = confirmFriendBtn.dataset.uid;
+            // Send request (write to their "received" list)
+            set(ref(db, `friend_requests/${friendUid}/${myUid}`), {
+                fromUid: myUid,
+                fromUsername: myUsername,
+                status: 'pending'
+            });
+            // Add to my "sent" list
+            set(ref(db, `users/${myUid}/sent_requests/${friendUid}`), {
+                username: name,
+                status: 'sent'
+            });
             
-            // This is a simulation. A real app would write to the database.
-            myFriendList.push({ uid: friendUid, name: name, status: 'sent', dms: [] });
-            renderActivityScreen();
             addFriendModal.classList.add('hidden');
             showToast("Friend Request Sent!");
         });
         
-        // NEW: Accept/Decline Friend Request
+        // --- NEW: Add Friend by Username Modal Handlers ---
+        showAddFriendModalBtn.addEventListener('click', () => {
+            addFriendUsernameModal.classList.remove('hidden');
+        });
+        
+        cancelAddByUsernameBtn.addEventListener('click', () => {
+            addFriendUsernameModal.classList.add('hidden');
+            usernameSearchInput.value = '';
+        });
+        
+        sendFriendRequestByUsernameBtn.addEventListener('click', async () => {
+            const usernameToFind = usernameSearchInput.value.trim();
+            if (usernameToFind === myUsername) {
+                showToast("You can't add yourself!", true);
+                return;
+            }
+            
+            // Query the database to find the user
+            const usersRef = ref(db, 'users');
+            const userQuery = query(usersRef, orderByChild('username'), equalTo(usernameToFind));
+            
+            get(userQuery).then(snapshot => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const friendUid = Object.keys(data)[0]; // Get the first matching user's UID
+                    const friendUsername = data[friendUid].username;
+                    
+                    // Check if already friends or request sent
+                    if (myFriendList.find(f => f.uid === friendUid) || mySentFriendRequests.find(f => f.uid === friendUid)) {
+                        showToast("You're already friends or request is sent!", true);
+                        return;
+                    }
+                    
+                    // Send request
+                    set(ref(db, `friend_requests/${friendUid}/${myUid}`), {
+                        fromUid: myUid,
+                        fromUsername: myUsername,
+                        status: 'pending'
+                    });
+                    set(ref(db, `users/${myUid}/sent_requests/${friendUid}`), {
+                        username: friendUsername,
+                        status: 'sent'
+                    });
+                    
+                    addFriendUsernameModal.classList.add('hidden');
+                    usernameSearchInput.value = '';
+                    showToast("Friend Request Sent!");
+                    
+                } else {
+                    showToast("User not found.", true);
+                }
+            });
+        });
+        
+        // --- NEW: Accept/Decline Friend Request Logic ---
         activityScreen.addEventListener('click', (e) => {
             const target = e.target;
             
             // --- ACCEPT FRIEND ---
             if (target.classList.contains('accept-friend-btn')) {
                 const friendUid = target.dataset.uid;
-                const name = target.dataset.name;
+                const friendName = target.dataset.name;
                 
-                // Remove from requests
-                myReceivedFriendRequests = myReceivedFriendRequests.filter(req => req.uid !== friendUid);
-                // Add to friends list
-                myFriendList.push({ uid: friendUid, name: name, status: 'accepted', dms: [] });
-                // Re-render the whole activity screen
-                renderActivityScreen();
-                showToast(`You are now friends with ${name}!`);
+                // 1. Add to my friends list
+                set(ref(db, `users/${myUid}/friends/${friendUid}`), {
+                    uid: friendUid,
+                    username: friendName,
+                    status: 'accepted'
+                });
+                
+                // 2. Add me to their friends list
+                set(ref(db, `users/${friendUid}/friends/${myUid}`), {
+                    uid: myUid,
+                    username: myUsername,
+                    status: 'accepted'
+                });
+                
+                // 3. Remove from their "sent" requests (if they have one)
+                remove(ref(db, `users/${friendUid}/sent_requests/${myUid}`));
+                
+                // 4. Remove from my "received" requests
+                remove(ref(db, `friend_requests/${myUid}/${friendUid}`));
+                
+                showToast(`You are now friends with ${friendName}!`);
             }
             
             // --- DECLINE FRIEND ---
             if (target.classList.contains('decline-friend-btn')) {
                 const friendUid = target.dataset.uid;
-                // Remove from requests
-                myReceivedFriendRequests = myReceivedFriendRequests.filter(req => req.uid !== friendUid);
-                // Re-render
-                renderActivityScreen();
+                // Just remove the request
+                remove(ref(db, `friend_requests/${myUid}/${friendUid}`));
                 showToast("Request declined.");
             }
         });
@@ -1402,7 +1508,7 @@
         friendsTab.addEventListener('click', (e) => {
             if (e.target.classList.contains('dm-btn')) {
                 const name = e.target.dataset.name;
-                const friend = myFriendList.find(f => f.name === name);
+                const friend = myFriendList.find(f => f.username === name);
                 if (friend) {
                     renderDMScreen(friend);
                     showScreen('dm-screen');
@@ -1462,16 +1568,26 @@
                 return showToast("Username must be at least 3 characters.", true);
             }
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    set(ref(db, 'users/' + user.uid), {
-                        username: username
-                    }).then(() => {
-                        showToast("Account created successfully!");
-                    });
-                })
-                .catch((error) => showToast(error.message, true));
+            // Check if username already exists
+            const usersRef = ref(db, 'users');
+            const userQuery = query(usersRef, orderByChild('username'), equalTo(username));
+            get(userQuery).then(snapshot => {
+                if (snapshot.exists()) {
+                    showToast("Username already taken. Please choose another.", true);
+                } else {
+                    // Username is available, create user
+                    createUserWithEmailAndPassword(auth, email, password)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            set(ref(db, 'users/' + user.uid), {
+                                username: username
+                            }).then(() => {
+                                showToast("Account created successfully!");
+                            });
+                        })
+                        .catch((error) => showToast(error.message, true));
+                }
+            });
         });
 
         logoutBtn.addEventListener('click', () => {
@@ -1481,13 +1597,23 @@
         saveUsernameBtn.addEventListener('click', () => {
             const newName = usernameInput.value.trim();
             if (newName && newName.length > 2 && myUid) {
-                set(ref(db, 'users/' + myUid), {
-                    username: newName
-                }).then(() => {
-                    myUsername = newName;
-                    showToast("Username saved!");
-                    showScreen('home-screen');
-                }).catch(err => showToast(err.message, true));
+                // Check if username already exists
+                const usersRef = ref(db, 'users');
+                const userQuery = query(usersRef, orderByChild('username'), equalTo(newName));
+                get(userQuery).then(snapshot => {
+                    if (snapshot.exists() && Object.keys(snapshot.val())[0] !== myUid) {
+                        showToast("Username already taken. Please choose another.", true);
+                    } else {
+                        // Username is available, save it
+                        set(ref(db, 'users/' + myUid), {
+                            username: newName
+                        }).then(() => {
+                            myUsername = newName;
+                            showToast("Username saved!");
+                            showScreen('home-screen');
+                        }).catch(err => showToast(err.message, true));
+                    }
+                });
             } else {
                 showToast("Username must be at least 3 characters.", true);
             }
@@ -1544,11 +1670,43 @@
             });
             
             // 5. Listen for user's own data (friends, requests)
-            // (This part would be built out in a real app)
-            // NEW: Add a simulated received friend request for demo purposes
-            myReceivedFriendRequests = [
-                { uid: 'dummyUser123', name: 'Curious Koala', status: 'received' }
-            ];
+            // NEW: Listen for received friend requests
+            onValue(ref(db, `friend_requests/${myUid}`), (snapshot) => {
+                myReceivedFriendRequests = [];
+                const data = snapshot.val();
+                if (data) {
+                    for (const key in data) {
+                        myReceivedFriendRequests.push({ fromUid: key, ...data[key] });
+                    }
+                }
+                renderFriendRequests();
+            });
+
+            // NEW: Listen for my accepted friends
+            onValue(ref(db, `users/${myUid}/friends`), (snapshot) => {
+                myFriendList = [];
+                const data = snapshot.val();
+                if (data) {
+                    for (const key in data) {
+                        myFriendList.push({ uid: key, ...data[key] });
+                    }
+                }
+                renderFriendList();
+            });
+            
+            // NEW: Listen for my sent requests
+            onValue(ref(db, `users/${myUid}/sent_requests`), (snapshot) => {
+                mySentFriendRequests = [];
+                const data = snapshot.val();
+                if (data) {
+                    for (const key in data) {
+                        mySentFriendRequests.push({ uid: key, ...data[key] });
+                    }
+                }
+                renderFriendList();
+            });
+
+            // This is for local simulation, real app would have this in database
             renderActivityScreen();
         }
 
@@ -1572,7 +1730,8 @@
                     chatMessages = [];
                     myFriendList = [];
                     myTradeRequests = [];
-                    myReceivedFriendRequests = []; // Clear simulated requests
+                    myReceivedFriendRequests = [];
+                    mySentFriendRequests = [];
                     // Render empty feeds
                     renderHustleFeed();
                     renderTradeFeed();
