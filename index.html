@@ -563,7 +563,8 @@
             remove,
             query, 
             orderByChild, 
-            equalTo 
+            equalTo,
+            off // NEW: Import `off` for detaching listeners
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { 
             getAuth, 
@@ -619,6 +620,10 @@
         let currentEditKey = null;
         let currentEditType = null; // 'hustle' or 'trade'
         let tradeImageFile = null;
+        
+        // --- NEW: DM State ---
+        let currentDMListener = null; // To hold the active DM listener
+        let currentDMChatId = null; // To hold the current friend's UID
         
         // --- DOM ELEMENTS ---
         const allScreens = document.querySelectorAll('.screen');
@@ -1169,22 +1174,24 @@
                 .catch(err => showToast(err.message, true));
         });
 
+        // --- NEW: Real DM Sending ---
         dmSendBtn.addEventListener('click', () => {
             const message = dmMessageInput.value;
-            const friendName = dmHeaderName.textContent.replace('DM with ', '');
-            if (!message || !friendName) return;
+            if (!message) return;
             
-            // This logic needs to be fully built out with a real DM structure in Firebase
-            // For this prototype, we'll just show the message locally
-            const friend = myFriendList.find(f => f.username === friendName);
-            if (friend) {
-                const newMsg = { user: "Me", message };
-                if (!friend.dms) friend.dms = [];
-                friend.dms.push(newMsg);
-                renderDMScreen(friend); // Re-render local DM screen
-            }
-            dmMessageInput.value = '';
-            // REMOVED TOAST
+            const newMsg = {
+                senderUid: myUid,
+                message: message,
+                timestamp: Date.now()
+            };
+            
+            // currentDMChatId is set when the DM screen is opened
+            const messagesRef = ref(db, `dms/${currentDMChatId}/messages`);
+            push(messagesRef, newMsg)
+                .then(() => {
+                    dmMessageInput.value = '';
+                })
+                .catch(err => showToast(err.message, true));
         });
         
         // --- Navigation ---
@@ -1227,7 +1234,13 @@
         
         backBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                resetForms(); // NEW: Reset forms when going back
+                // NEW: Detach DM listener if we're leaving the DM screen
+                if (btn.dataset.target === 'friends-hub-screen' && currentDMListener) {
+                    off(ref(db, `dms/${currentDMChatId}/messages`), 'value', currentDMListener);
+                    currentDMListener = null;
+                    currentDMChatId = null;
+                }
+                resetForms();
                 showScreen(btn.dataset.target);
             });
         });
@@ -1245,35 +1258,54 @@
             document.getElementById(tabId + '-btn').classList.add('active');
         }
 
-        function renderDMScreen(friend) {
-            dmHeaderName.textContent = `DM with ${friend.username}`;
+        // --- NEW: Real DM Screen Rendering ---
+        function renderDMScreen(friendUid, friendUsername) {
+            dmHeaderName.textContent = `DM with ${friendUsername}`;
+            dmHeaderName.dataset.friendUid = friendUid; // Store UID for sending
             dmFeed.innerHTML = '';
             
-            if (!friend.dms) friend.dms = [];
+            // Create a consistent, sorted chat ID
+            currentDMChatId = myUid < friendUid ? `${myUid}_${friendUid}` : `${friendUid}_${myUid}`;
+            const messagesRef = ref(db, `dms/${currentDMChatId}/messages`);
 
-            if (friend.dms.length === 0) {
-                friend.dms.push({ user: friend.username, message: "Hey! What's up?" });
+            // Detach any old listener
+            if (currentDMListener) {
+                off(ref(db, `dms/${currentDMChatId}/messages`), 'value', currentDMListener);
             }
 
-            friend.dms.forEach(msg => {
-                const bubble = document.createElement('div');
-                let justify = 'justify-start';
-                let colors = 'bg-gray-100 dark:bg-gray-700';
-                
-                if (msg.user === 'Me') {
-                    justify = 'justify-end';
-                    colors = 'bg-blue-100 dark:bg-blue-800';
+            // Attach new listener
+            currentDMListener = onValue(messagesRef, (snapshot) => {
+                dmFeed.innerHTML = '';
+                const data = snapshot.val();
+                if (data) {
+                    const messages = Object.values(data);
+                    messages.sort((a, b) => a.timestamp - b.timestamp); // Sort by time
+                    
+                    messages.forEach(msg => {
+                        const bubble = document.createElement('div');
+                        let justify = 'justify-start';
+                        let colors = 'bg-gray-100 dark:bg-gray-700';
+                        
+                        if (msg.senderUid === myUid) {
+                            justify = 'justify-end';
+                            colors = 'bg-blue-100 dark:bg-blue-800';
+                        }
+                        
+                        bubble.className = `flex ${justify}`;
+                        bubble.innerHTML = `
+                            <div class="${colors} p-3 rounded-lg max-w-xs">
+                                <p class="text-sm text-gray-800 dark:text-gray-200">${msg.message}</p>
+                            </div>
+                        `;
+                        dmFeed.appendChild(bubble);
+                    });
+                } else {
+                    dmFeed.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400">No messages yet. Say hi!</p>`;
                 }
-                
-                bubble.className = `flex ${justify}`;
-                bubble.innerHTML = `
-                    <div class="${colors} p-3 rounded-lg max-w-xs">
-                        <p class="text-sm text-gray-800 dark:text-gray-200">${msg.message}</p>
-                    </div>
-                `;
-                dmFeed.appendChild(bubble);
+                dmFeed.scrollTop = dmFeed.scrollHeight;
             });
-            dmFeed.scrollTop = dmFeed.scrollHeight;
+            
+            showScreen('dm-screen');
         }
         
         // --- Modal & Edit/Delete Logic (NOW LIVE!) ---
@@ -1523,11 +1555,8 @@
         friendListTab.addEventListener('click', (e) => {
             if (e.target.classList.contains('dm-btn')) {
                 const name = e.target.dataset.name;
-                const friend = myFriendList.find(f => f.username === name);
-                if (friend) {
-                    renderDMScreen(friend);
-                    showScreen('dm-screen');
-                }
+                const friendUid = e.target.dataset.friendUid;
+                renderDMScreen(friendUid, name);
             }
         });
 
