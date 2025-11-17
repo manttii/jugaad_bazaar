@@ -518,7 +518,7 @@
             onValue, 
             set, 
             get,
-            remove // NEW: Import `remove`
+            remove
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { 
             getAuth, 
@@ -527,6 +527,13 @@
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        // NEW: Import Storage SDK
+        import { 
+            getStorage, 
+            ref as storageRef, // Use 'as' to avoid conflict with db ref
+            uploadBytes, 
+            getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         
         // --- 1. FIREBASE CONFIG ---
         // This is your config, pasted in.
@@ -546,6 +553,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
+        const storage = getStorage(app); // NEW: Initialize Storage
 
 
         // --- User's State ---
@@ -562,6 +570,7 @@
         // --- NEW: Edit State ---
         let currentEditKey = null;
         let currentEditType = null; // 'hustle' or 'trade'
+        let tradeImageFile = null; // NEW: store the file object
         
         // --- DOM ELEMENTS ---
         const allScreens = document.querySelectorAll('.screen');
@@ -644,15 +653,14 @@
         const hustleSubject = document.getElementById('hustle-subject');
         const hustleDesc = document.getElementById('hustle-desc');
         const hustleContact = document.getElementById('hustle-contact');
-        const hustleFormTitle = document.getElementById('hustle-form-title'); // NEW
+        const hustleFormTitle = document.getElementById('hustle-form-title');
         
         const tradeSubject = document.getElementById('trade-subject');
         const tradeDesc = document.getElementById('trade-desc');
         const tradeContact = document.getElementById('trade-contact');
-        const tradeFormTitle = document.getElementById('trade-form-title'); // NEW
+        const tradeFormTitle = document.getElementById('trade-form-title');
         
         const usernameInput = document.getElementById('username-input');
-        let tradeImageBase64 = null; // To store image data
 
         // Activity Screen
         const activityScreen = document.getElementById('activity-screen');
@@ -727,7 +735,7 @@
             tradeContact.value = '';
             tradeImagePreview.src = 'https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview';
             tradeImageUpload.value = null;
-            tradeImageBase64 = null;
+            tradeImageFile = null; // Clear the file
         }
         
         // --- Render Functions (NOW LIVE!) ---
@@ -951,30 +959,56 @@
             }
         });
         
-        saveTradeBtn.addEventListener('click', () => {
+        // --- NEW: saveTradeBtn logic updated for Firebase Storage ---
+        saveTradeBtn.addEventListener('click', async () => { // Make it async
             const subject = tradeSubject.value;
             const desc = tradeDesc.value;
             const contact = tradeContact.value;
             
-            if (!subject || !desc || !contact) {
-                showToast("All fields are required.", true);
-                return;
-            }
-            
-            // In edit mode, if they don't upload a new image, use the old one
-            const image = tradeImagePreview.src;
-            if (!image || image.startsWith('https://placehold.co')) {
+            // Check for file first, separate from other fields
+            if (!tradeImageFile && !currentEditKey) { // Only require a new file on NEW posts
                 showToast("An image is required.", true);
                 return;
             }
+            
+            if (!subject || !desc || !contact) {
+                showToast("All text fields are required.", true);
+                return;
+            }
+            
+            showToast("Uploading... Please wait.", false);
+            saveTradeBtn.disabled = true;
+            saveTradeBtn.textContent = "Uploading...";
 
+            let imageUrl = tradeImagePreview.src; // Default to old image (for edits)
+            
+            // If a new file was selected, upload it
+            if (tradeImageFile) {
+                const filePath = `trades/${myUid}/${Date.now()}_${tradeImageFile.name}`;
+                const sRef = storageRef(storage, filePath);
+                
+                try {
+                    // 1. Upload the file
+                    await uploadBytes(sRef, tradeImageFile);
+                    // 2. Get the URL
+                    imageUrl = await getDownloadURL(sRef);
+                } catch (error) {
+                    console.error("Upload failed", error);
+                    showToast("Image upload failed. Please try again.", true);
+                    saveTradeBtn.disabled = false;
+                    resetForms();
+                    return;
+                }
+            }
+            
+            // 3. Now, save the post data with the NEW URL
             const tradeData = {
                 uid: myUid,
                 username: myUsername,
                 subject: subject,
                 desc: desc,
                 contact: contact,
-                image: image, // Save the base64 string
+                image: imageUrl, // Save the new download URL
                 createdAt: Date.now()
             };
 
@@ -987,7 +1021,8 @@
                         showScreen('trade-screen');
                         resetForms();
                     })
-                    .catch(err => showToast(err.message, true));
+                    .catch(err => showToast(err.message, true))
+                    .finally(() => saveTradeBtn.disabled = false);
             } else {
                 // NEW POST MODE
                 push(ref(db, 'trades'), tradeData)
@@ -996,21 +1031,23 @@
                         showScreen('trade-screen');
                         resetForms();
                     })
-                    .catch(err => showToast(err.message, true));
+                    .catch(err => showToast(err.message, true))
+                    .finally(() => saveTradeBtn.disabled = false);
             }
         });
         
+        // --- NEW: tradeImageUpload listener updated to store File object ---
         tradeImageUpload.addEventListener('change', () => {
             const file = tradeImageUpload.files[0];
             if (file) {
+                tradeImageFile = file; // Store the file
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     tradeImagePreview.src = e.target.result;
-                    tradeImageBase64 = e.target.result.split(',')[1];
                 }
                 reader.readAsDataURL(file);
             } else {
-                tradeImageBase64 = null;
+                tradeImageFile = null;
             }
         });
         
