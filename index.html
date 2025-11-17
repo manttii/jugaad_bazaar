@@ -148,6 +148,13 @@
                 </svg>
             </button>
             
+            <!-- NEW: DM Hub Button -->
+            <button id="dm-hub-btn" class="absolute top-4 right-14 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.056 3 12c0 2.22.75 4.29 2.0 5.775L3 21l3.775-2.003A11.316 11.316 0 0012 20.25z" />
+                </svg>
+            </button>
+            
             <!-- Dark Mode Toggle -->
             <button id="dark-mode-toggle" class="absolute top-4 right-4 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -185,8 +192,8 @@
                     <p class="text-sm text-green-100">Chat anonymously with nearby users</p>
                 </button>
                 <button id="activity-btn" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                    <span class="text-lg">🔔 My Activity</span>
-                    <p class="text-sm text-gray-100">View your trade requests & friends</p>
+                    <span class="text-lg">🔔 My Trade Requests</span>
+                    <p class="text-sm text-gray-100">View your pending trades</p>
                 </button>
             </div>
         </div>
@@ -368,7 +375,7 @@
             </div>
         </div>
         
-        <!-- Screen 7: My Activity Page -->
+        <!-- Screen 7: My Activity Page (NOW JUST TRADES) -->
         <div id="activity-screen" class="screen flex flex-col h-full">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 relative">
@@ -378,27 +385,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">My Activity</h2>
-                    <!-- NEW: Add Friend by Username Button -->
-                    <button id="show-add-friend-modal-btn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">My Trade Requests</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
                 </div>
-            </div>
-            
-            <!-- Tab Navigation -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button id="trade-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="trade-requests-tab">
-                    Trades
-                </button>
-                <button id="friend-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-requests-tab">
-                    Requests
-                </button>
-                <button id="friend-list-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-list-tab">
-                    Friends
-                </button>
             </div>
             
             <!-- Tab Content -->
@@ -408,16 +397,6 @@
                     <!-- Trade requests will be dynamically added here -->
                     <p id="no-trade-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No trade requests sent yet.</p>
                 </div>
-                <!-- NEW: Friend Requests Tab Content -->
-                <div id="friend-requests-tab" class="tab-content space-y-4 hidden">
-                    <!-- Friend requests will be dynamically added here -->
-                    <p id="no-friend-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No new friend requests.</p>
-                </div>
-                <!-- Friend List Tab -->
-                <div id="friend-list-tab" class="tab-content space-y-4 hidden">
-                    <!-- Friends will be dynamically added here -->
-                    <p id="no-friends" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No friends added yet. Add friends from Campus Chat!</p>
-                </div>
             </div>
         </div>
         
@@ -426,7 +405,8 @@
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between items-center">
-                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="activity-screen">
+                    <!-- NEW: Back button goes to friends hub -->
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="friends-hub-screen">
                         <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
@@ -460,18 +440,6 @@
                 <div class="flex gap-4 mt-4">
                     <button id="cancel-friend-btn" class="w-full bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
                     <button id="confirm-friend-btn" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Send Request</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- NEW: Modal for "Add Friend by Username" -->
-        <div id="add-friend-username-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Add Friend by Username</h3>
-                <input type="text" id="username-search-input" placeholder="Enter exact username..." class="mt-4 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                <div class="flex gap-4 mt-4">
-                    <button id="cancel-add-by-username-btn" class="w-full bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
-                    <button id="send-friend-request-by-username-btn" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Send Request</button>
                 </div>
             </div>
         </div>
@@ -520,6 +488,55 @@
                 <button id="logout-btn" class="w-full bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                     Logout
                 </button>
+            </div>
+        </div>
+
+        <!-- NEW Screen 10: Friends Hub -->
+        <div id="friends-hub-screen" class="screen flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 relative">
+                <div class="flex justify-between items-center">
+                    <button class="back-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" data-target="home-screen">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Friends Hub</h2>
+                    <span class="w-8"></span> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button id="friend-list-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="friend-list-tab">
+                    My Friends
+                </button>
+                <button id="add-friend-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="add-friend-tab">
+                    Add Friend
+                </button>
+                <button id="friend-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-requests-tab">
+                    Requests
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Friend List Tab -->
+                <div id="friend-list-tab" class="tab-content space-y-4 p-4">
+                    <!-- Friends will be dynamically added here -->
+                    <p id="no-friends" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No friends added yet. Add friends from Campus Chat!</p>
+                </div>
+                <!-- Add Friend Tab -->
+                <div id="add-friend-tab" class="tab-content space-y-4 hidden p-4">
+                    <label for="username-search-input-hub" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Add Friend by Username</label>
+                    <input type="text" id="username-search-input-hub" placeholder="Enter exact username..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <button id="send-friend-request-by-username-btn" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Send Request</button>
+                </div>
+                <!-- Friend Requests Tab Content -->
+                <div id="friend-requests-tab" class="tab-content space-y-4 hidden p-4">
+                    <!-- Friend requests will be dynamically added here -->
+                    <p id="no-friend-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No new friend requests.</p>
+                </div>
             </div>
         </div>
         
@@ -581,26 +598,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        const storage = getStorage(app); // NEW: Initialize Storage
+        const storage = getStorage(app);
 
 
         // --- User's State ---
         let myUsername = "Anonymous Panda"; // Default name
         let myUid = null; // User's unique ID
         let myTradeRequests = []; // Stores { id, subject, status, contact, image }
-        let myFriendList = []; // RENAMED
-        let myReceivedFriendRequests = []; // NEW
-        let mySentFriendRequests = []; // NEW: To track sent requests
+        let myFriendList = [];
+        let myReceivedFriendRequests = [];
+        let mySentFriendRequests = [];
+        let allUsers = {}; // NEW: To store a map of UID -> Username
         
         // --- Local Arrays (cleared on render) ---
         let hustleDatabase = [];
         let tradeDatabase = [];
         let chatMessages = [];
         
-        // --- NEW: Edit State ---
+        // --- Edit State ---
         let currentEditKey = null;
         let currentEditType = null; // 'hustle' or 'trade'
-        let tradeImageFile = null; // NEW: store the file object
+        let tradeImageFile = null;
         
         // --- DOM ELEMENTS ---
         const allScreens = document.querySelectorAll('.screen');
@@ -641,6 +659,7 @@
         const chatBtn = document.getElementById('chat-btn');
         const activityBtn = document.getElementById('activity-btn');
         const settingsBtn = document.getElementById('settings-btn');
+        const dmHubBtn = document.getElementById('dm-hub-btn'); // NEW
         
         // "Post New" Buttons
         const postHustleBtn = document.getElementById('post-hustle-btn');
@@ -679,12 +698,9 @@
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         
-        // NEW: Add Friend by Username Modal
-        const addFriendUsernameModal = document.getElementById('add-friend-username-modal');
-        const showAddFriendModalBtn = document.getElementById('show-add-friend-modal-btn');
-        const cancelAddByUsernameBtn = document.getElementById('cancel-add-by-username-btn');
+        // MOVED: Add Friend by Username elements
         const sendFriendRequestByUsernameBtn = document.getElementById('send-friend-request-by-username-btn');
-        const usernameSearchInput = document.getElementById('username-search-input');
+        const usernameSearchInput = document.getElementById('username-search-input-hub');
         
         // Form Inputs
         const hustleSubject = document.getElementById('hustle-subject');
@@ -702,16 +718,19 @@
         // Activity Screen
         const activityScreen = document.getElementById('activity-screen');
         const tradeRequestsTabBtn = document.getElementById('trade-requests-tab-btn');
-        const friendsTabBtn = document.getElementById('friend-list-tab-btn'); // Renamed
         const tradeRequestsTab = document.getElementById('trade-requests-tab');
-        const friendsTab = document.getElementById('friend-list-tab'); // Renamed
         const noTradeRequests = document.getElementById('no-trade-requests');
-        const noFriends = document.getElementById('no-friends');
-        // NEW: Friend Request Tab
-        const friendRequestsTabBtn = document.getElementById('friend-requests-tab-btn');
-        const friendRequestsTab = document.getElementById('friend-requests-tab');
-        const noFriendRequests = document.getElementById('no-friend-requests');
 
+        // NEW: Friends Hub Screen
+        const friendsHubScreen = document.getElementById('friends-hub-screen');
+        const friendListTabBtn = document.getElementById('friend-list-tab-btn');
+        const addFriendTabBtn = document.getElementById('add-friend-tab-btn');
+        const friendRequestsTabBtn = document.getElementById('friend-requests-tab-btn');
+        const friendListTab = document.getElementById('friend-list-tab');
+        const addFriendTab = document.getElementById('add-friend-tab');
+        const friendRequestsTab = document.getElementById('friend-requests-tab');
+        const noFriends = document.getElementById('no-friends');
+        const noFriendRequests = document.getElementById('no-friend-requests');
         
         // DM Screen
         const dmScreen = document.getElementById('dm-screen');
@@ -740,8 +759,11 @@
                 screenElement.style.justifyContent = 'center';
             }
             if (screenId === 'activity-screen') {
-                // Default to the first tab, trade-requests-tab
-                showActivityTab('trade-requests-tab'); 
+                renderActivityScreen();
+            }
+            if (screenId === 'friends-hub-screen') {
+                // Default to the first tab
+                showFriendsHubTab('friend-list-tab'); 
             }
             if (screenId === 'settings-screen') {
                 usernameInput.value = myUsername;
@@ -906,8 +928,6 @@
 
         function renderActivityScreen() {
             renderTradeRequests();
-            renderFriendRequests(); // NEW
-            renderFriendList(); // RENAMED
         }
         
         function renderTradeRequests() {
@@ -961,7 +981,7 @@
         }
         
         function renderFriendList() {
-            friendsTab.innerHTML = '';
+            friendListTab.innerHTML = '';
             const allFriends = [...myFriendList, ...mySentFriendRequests]; // Combine lists
             
             if (allFriends.length === 0) {
@@ -992,7 +1012,7 @@
                         DM
                     </button>
                 `;
-                friendsTab.appendChild(card);
+                friendListTab.appendChild(card);
             });
         }
         
@@ -1156,7 +1176,7 @@
             
             // This logic needs to be fully built out with a real DM structure in Firebase
             // For this prototype, we'll just show the message locally
-            const friend = myFriendList.find(f => f.name === friendName);
+            const friend = myFriendList.find(f => f.username === friendName);
             if (friend) {
                 const newMsg = { user: "Me", message };
                 if (!friend.dms) friend.dms = [];
@@ -1164,7 +1184,7 @@
                 renderDMScreen(friend); // Re-render local DM screen
             }
             dmMessageInput.value = '';
-            showToast("DM sending not fully wired up in this prototype.", true);
+            // REMOVED TOAST
         });
         
         // --- Navigation ---
@@ -1190,6 +1210,11 @@
             usernameInput.value = myUsername;
             showScreen('settings-screen');
         });
+
+        // NEW: DM Hub Button
+        dmHubBtn.addEventListener('click', () => {
+            showScreen('friends-hub-screen');
+        });
         
         postHustleBtn.addEventListener('click', () => {
             resetForms(); // NEW: Reset form before showing
@@ -1207,14 +1232,14 @@
             });
         });
 
-        // --- NEW: Activity Tab Navigation (3 tabs) ---
-        tradeRequestsTabBtn.addEventListener('click', () => showActivityTab('trade-requests-tab'));
-        friendRequestsTabBtn.addEventListener('click', () => showActivityTab('friend-requests-tab'));
-        friendsTabBtn.addEventListener('click', () => showActivityTab('friend-list-tab'));
+        // --- NEW: Friends Hub Tab Navigation (3 tabs) ---
+        friendListTabBtn.addEventListener('click', () => showFriendsHubTab('friend-list-tab'));
+        addFriendTabBtn.addEventListener('click', () => showFriendsHubTab('add-friend-tab'));
+        friendRequestsTabBtn.addEventListener('click', () => showFriendsHubTab('friend-requests-tab'));
         
-        function showActivityTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        function showFriendsHubTab(tabId) {
+            document.querySelectorAll('#friends-hub-screen .tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('#friends-hub-screen .tab-btn').forEach(btn => btn.classList.remove('active'));
             
             document.getElementById(tabId).classList.remove('hidden');
             document.getElementById(tabId + '-btn').classList.add('active');
@@ -1410,16 +1435,7 @@
             showToast("Friend Request Sent!");
         });
         
-        // --- NEW: Add Friend by Username Modal Handlers ---
-        showAddFriendModalBtn.addEventListener('click', () => {
-            addFriendUsernameModal.classList.remove('hidden');
-        });
-        
-        cancelAddByUsernameBtn.addEventListener('click', () => {
-            addFriendUsernameModal.classList.add('hidden');
-            usernameSearchInput.value = '';
-        });
-        
+        // --- NEW: Add Friend by Username (MOVED from modal) ---
         sendFriendRequestByUsernameBtn.addEventListener('click', async () => {
             const usernameToFind = usernameSearchInput.value.trim();
             if (usernameToFind === myUsername) {
@@ -1454,7 +1470,6 @@
                         status: 'sent'
                     });
                     
-                    addFriendUsernameModal.classList.add('hidden');
                     usernameSearchInput.value = '';
                     showToast("Friend Request Sent!");
                     
@@ -1465,7 +1480,7 @@
         });
         
         // --- NEW: Accept/Decline Friend Request Logic ---
-        activityScreen.addEventListener('click', (e) => {
+        friendRequestsTab.addEventListener('click', (e) => {
             const target = e.target;
             
             // --- ACCEPT FRIEND ---
@@ -1505,7 +1520,7 @@
             }
         });
         
-        friendsTab.addEventListener('click', (e) => {
+        friendListTab.addEventListener('click', (e) => {
             if (e.target.classList.contains('dm-btn')) {
                 const name = e.target.dataset.name;
                 const friend = myFriendList.find(f => f.username === name);
@@ -1637,6 +1652,11 @@
                     myUsername = getRandomName();
                 }
             });
+
+            // 1b. Get all users for mapping UIDs to usernames
+            onValue(ref(db, 'users'), (snapshot) => {
+                allUsers = snapshot.val() || {};
+            });
             
             // 2. Listen for new Hustles
             onValue(ref(db, 'hustles'), (snapshot) => {
@@ -1705,9 +1725,6 @@
                 }
                 renderFriendList();
             });
-
-            // This is for local simulation, real app would have this in database
-            renderActivityScreen();
         }
 
         // --- INITIALIZATION ---
@@ -1737,6 +1754,8 @@
                     renderTradeFeed();
                     renderChatFeed();
                     renderActivityScreen();
+                    renderFriendList();
+                    renderFriendRequests();
                     showScreen('login-screen');
                 }
             });
