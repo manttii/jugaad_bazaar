@@ -243,7 +243,8 @@
             </div>
             
             <!-- Trade Feed (Scrollable) -->
-            <div id="trade-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 grid grid-cols-2 gap-4">
+            <div id="trade-feed" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                <!-- REMOVED grid-cols-2, now a list like Hustle feed -->
                 <!-- Trade cards will be dynamically added here -->
                 <p id="no-trades" class="text-gray-500 dark:text-gray-400 text-center p-4 col-span-2 hidden">No items for trade yet. Be the first!</p>
             </div>
@@ -313,10 +314,7 @@
                     <label for="hustle-desc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                     <textarea id="hustle-desc" rows="4" placeholder="e.g., Stuck on my data structures lab. Need help for 1 hour. Will pay ₹150." class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
                 </div>
-                <div>
-                    <label for="hustle-contact" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info (Phone, Email, etc.)</label>
-                    <input type="text" id="hustle-contact" placeholder="e.g., DM me @..." class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
+                <!-- Contact info removed for DM feature -->
             </div>
             
             <!-- Post Button (Sticky Footer) -->
@@ -345,12 +343,7 @@
             <!-- Form -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
                 
-                <!-- Image Upload -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Photo</label>
-                    <img id="trade-image-preview" src="https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview" alt="Image Preview" class="mt-2 w-full h-48 object-cover rounded-lg bg-gray-200 dark:bg-gray-700">
-                    <input type="file" id="trade-image-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-800">
-                </div>
+                <!-- Image Upload REMOVED -->
                 
                 <div>
                     <label for="trade-subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Item Name / Title</label>
@@ -389,13 +382,26 @@
                     <span class="w-8"></span> <!-- Spacer -->
                 </div>
             </div>
+
+            <!-- NEW: Two-tab layout -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button id="sent-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="sent-requests-tab">
+                    Sent
+                </button>
+                <button id="received-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="received-requests-tab">
+                    Received
+                </button>
+            </div>
             
             <!-- Tab Content -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
-                <!-- Trade Requests Tab -->
-                <div id="trade-requests-tab" class="tab-content space-y-4">
-                    <!-- Trade requests will be dynamically added here -->
+                <!-- Sent Trade Requests Tab -->
+                <div id="sent-requests-tab" class="tab-content space-y-4">
                     <p id="no-trade-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No trade requests sent yet.</p>
+                </div>
+                <!-- Received Trade Requests Tab -->
+                <div id="received-requests-tab" class="tab-content space-y-4 hidden">
+                    <p id="no-received-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No new trade requests received.</p>
                 </div>
             </div>
         </div>
@@ -564,7 +570,7 @@
             query, 
             orderByChild, 
             equalTo,
-            off // NEW: Import `off` for detaching listeners
+            off // Import `off` for detaching listeners
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { 
             getAuth, 
@@ -575,10 +581,8 @@
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         // Import Storage SDK
         import { 
-            getStorage, 
-            ref as storageRef, // Use 'as' to avoid conflict with db ref
-            uploadBytes, 
-            getDownloadURL 
+            getStorage
+            // All storage functions removed
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         
         // --- 1. FIREBASE CONFIG ---
@@ -599,7 +603,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        const storage = getStorage(app);
+        // const storage = getStorage(app); // REMOVED
 
 
         // --- User's State ---
@@ -609,7 +613,7 @@
         let myFriendList = [];
         let myReceivedFriendRequests = [];
         let mySentFriendRequests = [];
-        let allUsers = {}; // NEW: To store a map of UID -> Username
+        let allUsers = {}; // To store a map of UID -> Username
         
         // --- Local Arrays (cleared on render) ---
         let hustleDatabase = [];
@@ -619,9 +623,9 @@
         // --- Edit State ---
         let currentEditKey = null;
         let currentEditType = null; // 'hustle' or 'trade'
-        let tradeImageFile = null;
+        // let tradeImageFile = null; // REMOVED
         
-        // --- NEW: DM State ---
+        // --- DM State ---
         let currentDMListener = null; // To hold the active DM listener
         let currentDMChatId = null; // To hold the current friend's UID
         
@@ -684,8 +688,8 @@
         const chatSendBtn = document.getElementById('chat-send-btn');
         
         // Trade Form Image
-        const tradeImageUpload = document.getElementById('trade-image-upload');
-        const tradeImagePreview = document.getElementById('trade-image-preview');
+        // const tradeImageUpload = document.getElementById('trade-image-upload'); // REMOVED
+        // const tradeImagePreview = document.getElementById('trade-image-preview'); // REMOVED
         
         // Dark Mode
         const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -710,7 +714,7 @@
         // Form Inputs
         const hustleSubject = document.getElementById('hustle-subject');
         const hustleDesc = document.getElementById('hustle-desc');
-        const hustleContact = document.getElementById('hustle-contact');
+        // const hustleContact = document.getElementById('hustle-contact'); // REMOVED
         const hustleFormTitle = document.getElementById('hustle-form-title');
         
         const tradeSubject = document.getElementById('trade-subject');
@@ -722,9 +726,10 @@
 
         // Activity Screen
         const activityScreen = document.getElementById('activity-screen');
-        const tradeRequestsTabBtn = document.getElementById('trade-requests-tab-btn');
-        const tradeRequestsTab = document.getElementById('trade-requests-tab');
+        const sentRequestsTab = document.getElementById('sent-requests-tab'); // NEW
+        const receivedRequestsTab = document.getElementById('received-requests-tab'); // NEW
         const noTradeRequests = document.getElementById('no-trade-requests');
+        const noReceivedRequests = document.getElementById('no-received-requests'); // NEW
 
         // NEW: Friends Hub Screen
         const friendsHubScreen = document.getElementById('friends-hub-screen');
@@ -764,7 +769,7 @@
                 screenElement.style.justifyContent = 'center';
             }
             if (screenId === 'activity-screen') {
-                renderActivityScreen();
+                showActivityTab('sent-requests-tab');
             }
             if (screenId === 'friends-hub-screen') {
                 // Default to the first tab
@@ -791,21 +796,19 @@
             currentEditType = null;
             
             // Reset Hustle Form
-            hustleFormTitle.textContent = "Post a New Hustle";
-            saveHustleBtn.textContent = "Post Hustle";
-            hustleSubject.value = '';
-            hustleDesc.value = '';
-            hustleContact.value = '';
+            if(hustleFormTitle) hustleFormTitle.textContent = "Post a New Hustle";
+            if(saveHustleBtn) saveHustleBtn.textContent = "Post Hustle";
+            if(hustleSubject) hustleSubject.value = '';
+            if(hustleDesc) hustleDesc.value = '';
             
             // Reset Trade Form
-            tradeFormTitle.textContent = "Post a New Item";
-            saveTradeBtn.textContent = "Post Item";
-            tradeSubject.value = '';
-            tradeDesc.value = '';
-            tradeContact.value = '';
-            tradeImagePreview.src = 'https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview';
-            tradeImageUpload.value = null;
-            tradeImageFile = null; // Clear the file
+            if(tradeFormTitle) tradeFormTitle.textContent = "Post a New Item";
+            if(saveTradeBtn) saveTradeBtn.textContent = "Post Item";
+            if(tradeSubject) tradeSubject.value = '';
+            if(tradeDesc) tradeDesc.value = '';
+            if(tradeContact) tradeContact.value = '';
+            
+            // tradeImageFile = null; // REMOVED
         }
         
         // --- Render Functions (NOW LIVE!) ---
@@ -835,8 +838,10 @@
                     card.innerHTML = `
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${hustle.subject}</h3>
                         <p class="text-gray-700 dark:text-gray-300">${hustle.desc}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Contact: ${hustle.contact}</p>
-                        <button class="contact-btn w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600" data-uid="${hustle.uid}" data-contact="${hustle.contact}">I'll do it!</button>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Posted by: ${hustle.username}</p>
+                        <button class="contact-btn w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600" data-uid="${hustle.uid}" data-name="${hustle.username}">
+                            Contact Seller
+                        </button>
                         ${adminButtons}
                     `;
                     hustleFeed.appendChild(card);
@@ -852,8 +857,9 @@
                 noTrades.classList.add('hidden');
                 tradeDatabase.slice().reverse().forEach(item => {
                     const card = document.createElement('div');
+                    // UPDATED: Removed grid-cols-2, so this is a list
                     card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col';
-                    const existingRequest = myTradeRequests.find(req => req.id === item.id);
+                    const existingRequest = myTradeRequests.find(req => req.tradePostKey === item.key); // UPDATED check
                     const buttonDisabled = existingRequest || item.uid === myUid ? 'disabled' : '';
                     let buttonText = 'Send Request';
                     if (existingRequest) buttonText = 'Request Sent';
@@ -870,8 +876,8 @@
                         `;
                     }
                     
+                    // REMOVED Image tag
                     card.innerHTML = `
-                        <img src="${item.image}" alt="${item.subject}" class="w-full h-32 object-cover">
                         <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${item.subject}</h3>
@@ -879,10 +885,9 @@
                             </div>
                             <div>
                                 <button class="trade-request-btn w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 mt-2 ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : ''}" 
-                                        data-id="${item.id}" 
+                                        data-key="${item.key}" 
                                         data-subject="${item.subject}" 
                                         data-contact="${item.contact}" 
-                                        data-image="${item.image}"
                                         data-owner-uid="${item.uid}"
                                         ${buttonDisabled}>
                                     ${buttonText}
@@ -931,23 +936,29 @@
             chatFeed.scrollTop = chatFeed.scrollHeight;
         }
 
+        // --- NEW: Updated Trade Request functions ---
         function renderActivityScreen() {
-            renderTradeRequests();
+            renderSentTradeRequests();
+            renderReceivedTradeRequests();
         }
         
-        function renderTradeRequests() {
-            tradeRequestsTab.innerHTML = '';
+        function renderSentTradeRequests() {
+            const sentTab = document.getElementById('sent-requests-tab');
+            const noRequestsEl = document.getElementById('no-trade-requests');
+            
+            // Clear only old cards
+            sentTab.querySelectorAll('.trade-request-card').forEach(card => card.remove());
+
             if (myTradeRequests.length === 0) {
-                noTradeRequests.classList.remove('hidden');
+                if (noRequestsEl) noRequestsEl.classList.remove('hidden');
                 return;
             }
-            noTradeRequests.classList.add('hidden');
+            if (noRequestsEl) noRequestsEl.classList.add('hidden');
             
             myTradeRequests.forEach((req, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center space-x-4';
+                card.className = 'trade-request-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center space-x-4';
                 card.innerHTML = `
-                    <img src="${req.image}" alt="${req.subject}" class="w-16 h-16 object-cover rounded-lg">
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.subject}</h3>
                         <p id="status-trade-${index}" class="text-sm ${req.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}">
@@ -955,22 +966,56 @@
                         </p>
                     </div>
                 `;
-                tradeRequestsTab.appendChild(card);
+                sentTab.appendChild(card);
+            });
+        }
+        
+        function renderReceivedTradeRequests() {
+            const receivedTab = document.getElementById('received-requests-tab');
+            const noReceivedEl = document.getElementById('no-received-requests');
+            const requests = Object.values(allUsers[myUid]?.received_trade_requests || {});
+            
+            // Clear only old cards
+            receivedTab.querySelectorAll('.trade-request-received-card').forEach(card => card.remove());
+
+            if (requests.length === 0) {
+                if (noReceivedEl) noReceivedEl.classList.remove('hidden');
+                return;
+            }
+            if (noReceivedEl) noReceivedEl.classList.add('hidden');
+            
+            requests.forEach((req) => {
+                const card = document.createElement('div');
+                card.className = 'trade-request-received-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4';
+                card.innerHTML = `
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.subject}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Request from: ${req.requesterUsername}</p>
+                    ${req.status === 'pending' ? 
+                    `<div class="flex gap-2 mt-2">
+                        <button class="accept-trade-btn w-full bg-green-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-600" data-key="${req.tradePostKey}" data-requester-uid="${req.requesterUid}">Accept</button>
+                        <button class="decline-trade-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-key="${req.tradePostKey}" data-requester-uid="${req.requesterUid}">Decline</button>
+                    </div>` : 
+                    `<p class="text-sm text-green-600 dark:text-green-400">You accepted this request.</p>`
+                    }
+                `;
+                receivedTab.appendChild(card);
             });
         }
 
-        // NEW: Render Friend Requests (Received)
+        // --- NEW: Render Friend Requests (Received) ---
         function renderFriendRequests() {
-            friendRequestsTab.innerHTML = '';
+            const noFriendRequestsEl = document.getElementById('no-friend-requests');
+            friendRequestsTab.querySelectorAll('.friend-request-card').forEach(card => card.remove());
+
             if (myReceivedFriendRequests.length === 0) {
-                noFriendRequests.classList.remove('hidden');
+                if (noFriendRequestsEl) noFriendRequestsEl.classList.remove('hidden');
                 return;
             }
-            noFriendRequests.classList.add('hidden');
+            if (noFriendRequestsEl) noFriendRequestsEl.classList.add('hidden');
 
             myReceivedFriendRequests.forEach((req) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
+                card.className = 'friend-request-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
                 card.innerHTML = `
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.fromUsername}</h3>
@@ -986,18 +1031,20 @@
         }
         
         function renderFriendList() {
-            friendListTab.innerHTML = '';
+            const noFriendsEl = document.getElementById('no-friends');
+            friendListTab.querySelectorAll('.friend-card').forEach(card => card.remove());
+
             const allFriends = [...myFriendList, ...mySentFriendRequests]; // Combine lists
             
             if (allFriends.length === 0) {
-                noFriends.classList.remove('hidden');
+                if (noFriendsEl) noFriendsEl.classList.remove('hidden');
                 return;
             }
-            noFriends.classList.add('hidden');
+            if (noFriendsEl) noFriendsEl.classList.add('hidden');
             
             allFriends.forEach((friend, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
+                card.className = 'friend-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
                 
                 let statusText = 'Accepted';
                 let statusColor = 'text-green-600 dark:text-green-400';
@@ -1026,9 +1073,8 @@
         saveHustleBtn.addEventListener('click', () => {
             const subject = hustleSubject.value;
             const desc = hustleDesc.value;
-            const contact = hustleContact.value;
             
-            if (!subject || !desc || !contact) {
+            if (!subject || !desc) {
                 showToast("All fields are required.", true);
                 return;
             }
@@ -1038,7 +1084,6 @@
                 username: myUsername,
                 subject: subject,
                 desc: desc,
-                contact: contact,
                 createdAt: Date.now()
             };
 
@@ -1064,97 +1109,49 @@
             }
         });
         
-        // --- NEW: saveTradeBtn logic updated for Firebase Storage ---
-        saveTradeBtn.addEventListener('click', async () => { // Make it async
+        // --- saveTradeBtn logic REMOVED image upload ---
+        saveTradeBtn.addEventListener('click', async () => {
             const subject = tradeSubject.value;
             const desc = tradeDesc.value;
             const contact = tradeContact.value;
-            
-            // Check for file first, separate from other fields
-            if (!tradeImageFile && !currentEditKey) { // Only require a new file on NEW posts
-                showToast("An image is required.", true);
-                return;
-            }
             
             if (!subject || !desc || !contact) {
                 showToast("All text fields are required.", true);
                 return;
             }
             
-            showToast("Uploading... Please wait.", false);
             saveTradeBtn.disabled = true;
-            saveTradeBtn.textContent = "Uploading...";
+            saveTradeBtn.textContent = "Posting...";
 
-            let imageUrl = tradeImagePreview.src; // Default to old image (for edits)
-            
-            // If a new file was selected, upload it
-            if (tradeImageFile) {
-                const filePath = `trades/${myUid}/${Date.now()}_${tradeImageFile.name}`;
-                const sRef = storageRef(storage, filePath);
-                
-                try {
-                    // 1. Upload the file
-                    await uploadBytes(sRef, tradeImageFile);
-                    // 2. Get the URL
-                    imageUrl = await getDownloadURL(sRef);
-                } catch (error) {
-                    console.error("Upload failed", error);
-                    showToast("Image upload failed. Please try again.", true);
-                    saveTradeBtn.disabled = false;
-                    resetForms();
-                    return;
-                }
-            }
-            
-            // 3. Now, save the post data with the NEW URL
             const tradeData = {
                 uid: myUid,
                 username: myUsername,
                 subject: subject,
                 desc: desc,
-                contact: contact,
-                image: imageUrl, // Save the new download URL
+                contact: contact, // This is still private for the request
                 createdAt: Date.now()
             };
 
+            let postRef;
             if (currentEditKey) {
                 // EDIT MODE
-                const postRef = ref(db, `trades/${currentEditKey}`);
-                set(postRef, tradeData)
-                    .then(() => {
-                        showToast("Item updated!");
-                        showScreen('trade-screen');
-                        resetForms();
-                    })
-                    .catch(err => showToast(err.message, true))
-                    .finally(() => saveTradeBtn.disabled = false);
+                postRef = ref(db, `trades/${currentEditKey}`);
             } else {
                 // NEW POST MODE
-                push(ref(db, 'trades'), tradeData)
-                    .then(() => {
-                        showToast("Item posted!");
-                        showScreen('trade-screen');
-                        resetForms();
-                    })
-                    .catch(err => showToast(err.message, true))
-                    .finally(() => saveTradeBtn.disabled = false);
+                postRef = push(ref(db, 'trades'));
             }
+
+            set(postRef, tradeData)
+                .then(() => {
+                    showToast(currentEditKey ? "Item updated!" : "Item posted!");
+                    showScreen('trade-screen');
+                    resetForms();
+                })
+                .catch(err => showToast(err.message, true))
+                .finally(() => saveTradeBtn.disabled = false);
         });
         
-        // --- NEW: tradeImageUpload listener updated to store File object ---
-        tradeImageUpload.addEventListener('change', () => {
-            const file = tradeImageUpload.files[0];
-            if (file) {
-                tradeImageFile = file; // Store the file
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    tradeImagePreview.src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            } else {
-                tradeImageFile = null;
-            }
-        });
+        // --- tradeImageUpload listener REMOVED ---
         
         chatSendBtn.addEventListener('click', () => {
             const message = chatMessageInput.value;
@@ -1236,7 +1233,8 @@
             btn.addEventListener('click', () => {
                 // NEW: Detach DM listener if we're leaving the DM screen
                 if (btn.dataset.target === 'friends-hub-screen' && currentDMListener) {
-                    off(ref(db, `dms/${currentDMChatId}/messages`), 'value', currentDMListener);
+                    const messagesRef = ref(db, `dms/${currentDMChatId}/messages`);
+                    off(messagesRef, 'value', currentDMListener);
                     currentDMListener = null;
                     currentDMChatId = null;
                 }
@@ -1258,6 +1256,19 @@
             document.getElementById(tabId + '-btn').classList.add('active');
         }
 
+        // --- NEW: Friends Hub Tab Navigation (2 tabs) for Activity Screen ---
+        document.getElementById('sent-requests-tab-btn')?.addEventListener('click', () => showActivityTab('sent-requests-tab'));
+        document.getElementById('received-requests-tab-btn')?.addEventListener('click', () => showActivityTab('received-requests-tab'));
+        
+        function showActivityTab(tabId) {
+            document.querySelectorAll('#activity-screen .tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('#activity-screen .tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId + '-btn').classList.add('active');
+        }
+
+
         // --- NEW: Real DM Screen Rendering ---
         function renderDMScreen(friendUid, friendUsername) {
             dmHeaderName.textContent = `DM with ${friendUsername}`;
@@ -1270,7 +1281,9 @@
 
             // Detach any old listener
             if (currentDMListener) {
-                off(ref(db, `dms/${currentDMChatId}/messages`), 'value', currentDMListener);
+                // We need the full path to detach
+                const oldMessagesRef = ref(db, `dms/${currentDMChatId}/messages`);
+                off(oldMessagesRef, 'value', currentDMListener);
             }
 
             // Attach new listener
@@ -1313,18 +1326,36 @@
         hustleFeed.addEventListener('click', (e) => {
             const target = e.target;
             
-            // --- CONTACT BUTTON ---
+            // --- NEW: CONTACT BUTTON (sends friend request) ---
             if (target.classList.contains('contact-btn')) {
                 const ownerUid = target.dataset.uid;
+                const ownerName = target.dataset.name;
+                
                 if (ownerUid === myUid) {
                     showToast("This is your own post!", true);
                     return;
                 }
-                const contactInfo = target.dataset.contact;
-                showToast(`Contact: ${contactInfo}`);
-                target.textContent = "Contacted!";
-                target.disabled = true;
-                target.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // Check if already friends
+                const isFriend = myFriendList.find(f => f.uid === ownerUid);
+                if (isFriend) {
+                    // If friends, open DM
+                    renderDMScreen(ownerUid, ownerName);
+                    return;
+                }
+                
+                // Check if request is already sent
+                const isSent = mySentFriendRequests.find(f => f.uid === ownerUid);
+                if (isSent) {
+                    showToast("Friend request already sent!");
+                    return;
+                }
+
+                // If not friends, pop up the add friend modal
+                friendModalName.textContent = ownerName;
+                confirmFriendBtn.dataset.name = ownerName;
+                confirmFriendBtn.dataset.uid = ownerUid;
+                addFriendModal.classList.remove('hidden');
             }
             
             // --- EDIT HUSTLE ---
@@ -1337,7 +1368,7 @@
                 saveHustleBtn.textContent = "Save Changes";
                 hustleSubject.value = postToEdit.subject;
                 hustleDesc.value = postToEdit.desc;
-                hustleContact.value = postToEdit.contact;
+                // hustleContact.value = postToEdit.contact; // REMOVED
                 
                 currentEditKey = key;
                 currentEditType = 'hustle';
@@ -1359,18 +1390,28 @@
             // --- SEND REQUEST ---
             if (target.classList.contains('trade-request-btn')) {
                 const btn = target;
-                const req = {
-                    id: btn.dataset.id,
+                const postKey = btn.dataset.key;
+                const ownerUid = btn.dataset.ownerUid;
+                
+                // 1. Add to owner's received_trade_requests
+                const ownerRequestRef = ref(db, `users/${ownerUid}/received_trade_requests/${postKey}`);
+                set(ownerRequestRef, {
+                    tradePostKey: postKey,
+                    requesterUid: myUid,
+                    requesterUsername: myUsername,
+                    subject: btn.dataset.subject,
+                    status: 'pending'
+                });
+                
+                // 2. Add to my sent_trade_requests
+                const myRequestRef = ref(db, `users/${myUid}/sent_trade_requests/${postKey}`);
+                set(myRequestRef, {
+                    tradePostKey: postKey,
                     subject: btn.dataset.subject,
                     contact: btn.dataset.contact,
-                    image: btn.dataset.image,
-                    status: 'pending',
-                    ownerUid: btn.dataset.ownerUid,
-                    requesterUid: myUid
-                };
-                
-                myTradeRequests.push(req);
-                renderActivityScreen();
+                    status: 'pending'
+                });
+
                 showToast("Request Sent! Check 'My Activity'");
                 btn.textContent = "Request Sent";
                 btn.disabled = true;
@@ -1388,7 +1429,7 @@
                 tradeSubject.value = postToEdit.subject;
                 tradeDesc.value = postToEdit.desc;
                 tradeContact.value = postToEdit.contact;
-                tradeImagePreview.src = postToEdit.image;
+                // tradeImagePreview.src = postToEdit.image; // REMOVED
                 
                 currentEditKey = key;
                 currentEditType = 'trade';
@@ -1557,6 +1598,31 @@
                 const name = e.target.dataset.name;
                 const friendUid = e.target.dataset.friendUid;
                 renderDMScreen(friendUid, name);
+            }
+        });
+
+        // --- NEW: Accept/Decline Trade Request Logic ---
+        activityScreen.addEventListener('click', (e) => {
+            const target = e.target;
+            const key = target.dataset.key;
+            const requesterUid = target.dataset.requesterUid;
+            
+            // --- ACCEPT TRADE ---
+            if (target.classList.contains('accept-trade-btn')) {
+                // 1. Update my received request
+                set(ref(db, `users/${myUid}/received_trade_requests/${key}/status`), 'accepted');
+                // 2. Update the sender's sent request
+                set(ref(db, `users/${requesterUid}/sent_trade_requests/${key}/status`), 'accepted');
+                showToast("Trade accepted!");
+            }
+            
+            // --- DECLINE TRADE ---
+            if (target.classList.contains('decline-trade-btn')) {
+                // 1. Remove from my received requests
+                remove(ref(db, `users/${myUid}/received_trade_requests/${key}`));
+                // 2. Remove from sender's sent requests
+                remove(ref(db, `users/${requesterUid}/sent_trade_requests/${key}`));
+                showToast("Trade declined.");
             }
         });
 
@@ -1754,6 +1820,24 @@
                 }
                 renderFriendList();
             });
+            
+            // NEW: Listen for my sent trade requests
+            onValue(ref(db, `users/${myUid}/sent_trade_requests`), (snapshot) => {
+                myTradeRequests = [];
+                const data = snapshot.val();
+                if(data) {
+                    for (const key in data) {
+                        myTradeRequests.push({ key: key, ...data[key] });
+                    }
+                }
+                renderSentTradeRequests();
+            });
+            
+            // NEW: Listen for my received trade requests
+            onValue(ref(db, `users/${myUid}/received_trade_requests`), (snapshot) => {
+                renderReceivedTradeRequests();
+            });
+            
         }
 
         // --- INITIALIZATION ---
