@@ -249,7 +249,7 @@
             </button>
         </div>
         
-        <!-- Screen 4: Campus Chat Page (Replaces Map) -->
+        <!-- Screen 4: Campus Chat Page -->
         <div id="chat-screen" class="screen flex flex-col h-full">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -281,7 +281,7 @@
             </div>
         </div>
         
-        <!-- Screen 5: New Hustle Form -->
+        <!-- Screen 5: New/Edit Hustle Form -->
         <div id="new-hustle-form" class="screen flex flex-col h-full">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -291,7 +291,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Hustle</h2>
+                    <h2 id="hustle-form-title" class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Hustle</h2>
                     <span class="w-8"></span> <!-- Spacer -->
                 </div>
             </div>
@@ -320,7 +320,7 @@
             </div>
         </div>
         
-        <!-- Screen 6: New Trade Form -->
+        <!-- Screen 6: New/Edit Trade Form -->
         <div id="new-trade-form" class="screen flex flex-col h-full">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -330,7 +330,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Item</h2>
+                    <h2 id="trade-form-title" class="text-xl font-bold text-gray-900 dark:text-gray-100">Post a New Item</h2>
                     <span class="w-8"></span> <!-- Spacer -->
                 </div>
             </div>
@@ -451,6 +451,18 @@
             </div>
         </div>
 
+        <!-- NEW: Modal for "Delete Post" -->
+        <div id="delete-confirm-modal" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 hidden z-50">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Are you sure?</h3>
+                <p class="mt-2 text-gray-600 dark:text-gray-300">Do you really want to delete this post? This action cannot be undone.</p>
+                <div class="flex gap-4 mt-4">
+                    <button id="cancel-delete-btn" class="w-full bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                    <button id="confirm-delete-btn" class="w-full bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Delete</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Screen 9: Settings Page -->
         <div id="settings-screen" class="screen flex flex-col h-full">
             <!-- Header -->
@@ -494,8 +506,7 @@
     </div>
 
     <!-- 
-      NEW: FIREBASE SDKs
-      These scripts import the code needed to talk to Firebase.
+      FIREBASE SDKs
     -->
     <script type="module">
         // Import the functions you need from the SDKs
@@ -506,7 +517,8 @@
             push, 
             onValue, 
             set, 
-            get 
+            get,
+            remove // NEW: Import `remove`
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
         import { 
             getAuth, 
@@ -517,7 +529,7 @@
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         
         // --- 1. FIREBASE CONFIG ---
-        // I have pasted your full config here.
+        // This is your config, pasted in.
         const firebaseConfig = {
             apiKey: "AIzaSyBKFQ1wKqErzZ4oOli9f6D5MN_AuI6FvQs",
             authDomain: "jugaad-bazaar.firebaseapp.com",
@@ -543,10 +555,13 @@
         let myFriendsList = []; // Stores { name, status, dms: [] }
         
         // --- Local Arrays (cleared on render) ---
-        // These are no longer the "source of truth". The database is.
         let hustleDatabase = [];
         let tradeDatabase = [];
         let chatMessages = [];
+        
+        // --- NEW: Edit State ---
+        let currentEditKey = null;
+        let currentEditType = null; // 'hustle' or 'trade'
         
         // --- DOM ELEMENTS ---
         const allScreens = document.querySelectorAll('.screen');
@@ -620,13 +635,22 @@
         const cancelFriendBtn = document.getElementById('cancel-friend-btn');
         const confirmFriendBtn = document.getElementById('confirm-friend-btn');
         
+        // NEW: Delete Modal
+        const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        
         // Form Inputs
         const hustleSubject = document.getElementById('hustle-subject');
         const hustleDesc = document.getElementById('hustle-desc');
         const hustleContact = document.getElementById('hustle-contact');
+        const hustleFormTitle = document.getElementById('hustle-form-title'); // NEW
+        
         const tradeSubject = document.getElementById('trade-subject');
         const tradeDesc = document.getElementById('trade-desc');
         const tradeContact = document.getElementById('trade-contact');
+        const tradeFormTitle = document.getElementById('trade-form-title'); // NEW
+        
         const usernameInput = document.getElementById('username-input');
         let tradeImageBase64 = null; // To store image data
 
@@ -682,6 +706,29 @@
                 toastNotification.classList.add('hidden');
             }, 3000);
         }
+
+        // --- NEW: Reset Form State ---
+        function resetForms() {
+            currentEditKey = null;
+            currentEditType = null;
+            
+            // Reset Hustle Form
+            hustleFormTitle.textContent = "Post a New Hustle";
+            saveHustleBtn.textContent = "Post Hustle";
+            hustleSubject.value = '';
+            hustleDesc.value = '';
+            hustleContact.value = '';
+            
+            // Reset Trade Form
+            tradeFormTitle.textContent = "Post a New Item";
+            saveTradeBtn.textContent = "Post Item";
+            tradeSubject.value = '';
+            tradeDesc.value = '';
+            tradeContact.value = '';
+            tradeImagePreview.src = 'https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview';
+            tradeImageUpload.value = null;
+            tradeImageBase64 = null;
+        }
         
         // --- Render Functions (NOW LIVE!) ---
         
@@ -695,11 +742,24 @@
                 hustleDatabase.slice().reverse().forEach(hustle => {
                     const card = document.createElement('div');
                     card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-2';
+                    
+                    // NEW: Add Edit/Delete buttons
+                    let adminButtons = '';
+                    if (hustle.uid === myUid) {
+                        adminButtons = `
+                        <div class="flex gap-2 mt-2">
+                            <button class="edit-hustle-btn w-full bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-yellow-600" data-key="${hustle.key}">Edit</button>
+                            <button class="delete-hustle-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-key="${hustle.key}">Delete</button>
+                        </div>
+                        `;
+                    }
+                    
                     card.innerHTML = `
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${hustle.subject}</h3>
                         <p class="text-gray-700 dark:text-gray-300">${hustle.desc}</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Contact: ${hustle.contact}</p>
                         <button class="contact-btn w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600" data-uid="${hustle.uid}" data-contact="${hustle.contact}">I'll do it!</button>
+                        ${adminButtons}
                     `;
                     hustleFeed.appendChild(card);
                 });
@@ -720,6 +780,17 @@
                     let buttonText = 'Send Request';
                     if (existingRequest) buttonText = 'Request Sent';
                     if (item.uid === myUid) buttonText = 'Your Item';
+
+                    // NEW: Add Edit/Delete buttons
+                    let adminButtons = '';
+                    if (item.uid === myUid) {
+                        adminButtons = `
+                        <div class="flex gap-2 mt-2">
+                            <button class="edit-trade-btn w-full bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-yellow-600" data-key="${item.key}">Edit</button>
+                            <button class="delete-trade-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-key="${item.key}">Delete</button>
+                        </div>
+                        `;
+                    }
                     
                     card.innerHTML = `
                         <img src="${item.image}" alt="${item.subject}" class="w-full h-32 object-cover">
@@ -728,15 +799,18 @@
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">${item.subject}</h3>
                                 <p class="text-sm text-gray-700 dark:text-gray-300">${item.desc}</p>
                             </div>
-                            <button class="trade-request-btn w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 mt-2 ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : ''}" 
-                                    data-id="${item.id}" 
-                                    data-subject="${item.subject}" 
-                                    data-contact="${item.contact}" 
-                                    data-image="${item.image}"
-                                    data-owner-uid="${item.uid}"
-                                    ${buttonDisabled}>
-                                ${buttonText}
-                            </button>
+                            <div>
+                                <button class="trade-request-btn w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 mt-2 ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                        data-id="${item.id}" 
+                                        data-subject="${item.subject}" 
+                                        data-contact="${item.contact}" 
+                                        data-image="${item.image}"
+                                        data-owner-uid="${item.uid}"
+                                        ${buttonDisabled}>
+                                    ${buttonText}
+                                </button>
+                                ${adminButtons}
+                            </div>
                         </div>
                     `;
                     tradeFeed.appendChild(card);
@@ -822,7 +896,7 @@
                 card.innerHTML = `
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">${friend.name}</h3>
-                        <p id="status-friend-${index}" class="text-sm ${friend.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-6D00 dark:text-green-400'}">
+                        <p id="status-friend-${index}" class="text-sm ${friend.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}">
                             ${friend.status}
                         </p>
                     </div>
@@ -834,7 +908,7 @@
             });
         }
         
-        // --- Form Handling (NOW LIVE!) ---
+        // --- Form Handling (NOW WITH EDIT!) ---
         
         saveHustleBtn.addEventListener('click', () => {
             const subject = hustleSubject.value;
@@ -846,7 +920,7 @@
                 return;
             }
             
-            const newHustle = {
+            const hustleData = {
                 uid: myUid,
                 username: myUsername,
                 subject: subject,
@@ -854,17 +928,27 @@
                 contact: contact,
                 createdAt: Date.now()
             };
-            
-            // Push to Firebase
-            push(ref(db, 'hustles'), newHustle)
-                .then(() => {
-                    showToast("Hustle posted!");
-                    showScreen('hustle-screen');
-                    hustleSubject.value = '';
-                    hustleDesc.value = '';
-                    hustleContact.value = '';
-                })
-                .catch(err => showToast(err.message, true));
+
+            if (currentEditKey) {
+                // EDIT MODE
+                const postRef = ref(db, `hustles/${currentEditKey}`);
+                set(postRef, hustleData)
+                    .then(() => {
+                        showToast("Hustle updated!");
+                        showScreen('hustle-screen');
+                        resetForms();
+                    })
+                    .catch(err => showToast(err.message, true));
+            } else {
+                // NEW POST MODE
+                push(ref(db, 'hustles'), hustleData)
+                    .then(() => {
+                        showToast("Hustle posted!");
+                        showScreen('hustle-screen');
+                        resetForms();
+                    })
+                    .catch(err => showToast(err.message, true));
+            }
         });
         
         saveTradeBtn.addEventListener('click', () => {
@@ -872,35 +956,48 @@
             const desc = tradeDesc.value;
             const contact = tradeContact.value;
             
-            if (!subject || !desc || !contact || !tradeImageBase64) {
-                showToast("All fields and an image are required.", true);
+            if (!subject || !desc || !contact) {
+                showToast("All fields are required.", true);
                 return;
             }
             
-            const newTrade = {
-                id: `trade${Date.now()}`, // Use timestamp for a unique-ish ID
+            // In edit mode, if they don't upload a new image, use the old one
+            const image = tradeImagePreview.src;
+            if (!image || image.startsWith('https://placehold.co')) {
+                showToast("An image is required.", true);
+                return;
+            }
+
+            const tradeData = {
                 uid: myUid,
                 username: myUsername,
                 subject: subject,
                 desc: desc,
                 contact: contact,
-                image: tradeImagePreview.src, // Save the base64 string
+                image: image, // Save the base64 string
                 createdAt: Date.now()
             };
 
-            // Push to Firebase
-            push(ref(db, 'trades'), newTrade)
-                .then(() => {
-                    showToast("Item posted!");
-                    showScreen('trade-screen');
-                    tradeSubject.value = '';
-                    tradeDesc.value = '';
-                    tradeContact.value = '';
-                    tradeImagePreview.src = 'https://placehold.co/600x400/e2e8f0/9ca3af?text=Image+Preview';
-                    tradeImageUpload.value = null;
-                    tradeImageBase64 = null;
-                })
-                .catch(err => showToast(err.message, true));
+            if (currentEditKey) {
+                // EDIT MODE
+                const postRef = ref(db, `trades/${currentEditKey}`);
+                set(postRef, tradeData)
+                    .then(() => {
+                        showToast("Item updated!");
+                        showScreen('trade-screen');
+                        resetForms();
+                    })
+                    .catch(err => showToast(err.message, true));
+            } else {
+                // NEW POST MODE
+                push(ref(db, 'trades'), tradeData)
+                    .then(() => {
+                        showToast("Item posted!");
+                        showScreen('trade-screen');
+                        resetForms();
+                    })
+                    .catch(err => showToast(err.message, true));
+            }
         });
         
         tradeImageUpload.addEventListener('change', () => {
@@ -928,7 +1025,6 @@
                 createdAt: Date.now()
             };
             
-            // Push to Firebase
             push(ref(db, 'chats'), newMsg)
                 .then(() => {
                     chatMessageInput.value = ''; // Clear input
@@ -977,11 +1073,18 @@
             showScreen('settings-screen');
         });
         
-        postHustleBtn.addEventListener('click', () => showScreen('new-hustle-form'));
-        postTradeBtn.addEventListener('click', () => showScreen('new-trade-form'));
+        postHustleBtn.addEventListener('click', () => {
+            resetForms(); // NEW: Reset form before showing
+            showScreen('new-hustle-form');
+        });
+        postTradeBtn.addEventListener('click', () => {
+            resetForms(); // NEW: Reset form before showing
+            showScreen('new-trade-form');
+        });
         
         backBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                resetForms(); // NEW: Reset forms when going back
                 showScreen(btn.dataset.target);
             });
         });
@@ -1025,58 +1128,132 @@
             dmFeed.scrollTop = dmFeed.scrollHeight;
         }
         
-        // --- Modal Logic (Now with Firebase logic) ---
+        // --- Modal & Edit/Delete Logic (NOW LIVE!) ---
         
         hustleFeed.addEventListener('click', (e) => {
-            if (e.target.classList.contains('contact-btn')) {
-                const ownerUid = e.target.dataset.uid;
+            const target = e.target;
+            
+            // --- CONTACT BUTTON ---
+            if (target.classList.contains('contact-btn')) {
+                const ownerUid = target.dataset.uid;
                 if (ownerUid === myUid) {
                     showToast("This is your own post!", true);
                     return;
                 }
-                // In a real app, this would start a DM.
-                // For now, we just show the contact info.
-                const contactInfo = e.target.dataset.contact;
+                const contactInfo = target.dataset.contact;
                 showToast(`Contact: ${contactInfo}`);
-                e.target.textContent = "Contacted!";
-                e.target.disabled = true;
-                e.target.classList.add('opacity-50', 'cursor-not-allowed');
+                target.textContent = "Contacted!";
+                target.disabled = true;
+                target.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            
+            // --- EDIT HUSTLE ---
+            if (target.classList.contains('edit-hustle-btn')) {
+                const key = target.dataset.key;
+                const postToEdit = hustleDatabase.find(h => h.key === key);
+                if (!postToEdit) return;
+                
+                hustleFormTitle.textContent = "Edit Your Hustle";
+                saveHustleBtn.textContent = "Save Changes";
+                hustleSubject.value = postToEdit.subject;
+                hustleDesc.value = postToEdit.desc;
+                hustleContact.value = postToEdit.contact;
+                
+                currentEditKey = key;
+                currentEditType = 'hustle';
+                showScreen('new-hustle-form');
+            }
+            
+            // --- DELETE HUSTLE ---
+            if (target.classList.contains('delete-hustle-btn')) {
+                const key = target.dataset.key;
+                currentEditKey = key;
+                currentEditType = 'hustle';
+                deleteConfirmModal.classList.remove('hidden');
             }
         });
         
         tradeFeed.addEventListener('click', (e) => {
-            if (e.target.classList.contains('trade-request-btn')) {
-                const btn = e.target;
+            const target = e.target;
+
+            // --- SEND REQUEST ---
+            if (target.classList.contains('trade-request-btn')) {
+                const btn = target;
                 const req = {
                     id: btn.dataset.id,
                     subject: btn.dataset.subject,
                     contact: btn.dataset.contact,
                     image: btn.dataset.image,
-                    status: 'pending', // 'pending'
+                    status: 'pending',
                     ownerUid: btn.dataset.ownerUid,
                     requesterUid: myUid
                 };
                 
-                // This is a complex operation:
-                // 1. Save this request to the *owner's* "received_requests"
-                // 2. Save this request to *my* "sent_requests"
-                // This is too complex for this prototype, so we'll just save to our local state.
                 myTradeRequests.push(req);
-                renderActivityScreen(); // Re-render activity
+                renderActivityScreen();
                 showToast("Request Sent! Check 'My Activity'");
                 btn.textContent = "Request Sent";
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
             }
+            
+            // --- EDIT TRADE ---
+            if (target.classList.contains('edit-trade-btn')) {
+                const key = target.dataset.key;
+                const postToEdit = tradeDatabase.find(t => t.key === key);
+                if (!postToEdit) return;
+                
+                tradeFormTitle.textContent = "Edit Your Item";
+                saveTradeBtn.textContent = "Save Changes";
+                tradeSubject.value = postToEdit.subject;
+                tradeDesc.value = postToEdit.desc;
+                tradeContact.value = postToEdit.contact;
+                tradeImagePreview.src = postToEdit.image;
+                
+                currentEditKey = key;
+                currentEditType = 'trade';
+                showScreen('new-trade-form');
+            }
+            
+            // --- DELETE TRADE ---
+            if (target.classList.contains('delete-trade-btn')) {
+                const key = target.dataset.key;
+                currentEditKey = key;
+                currentEditType = 'trade';
+                deleteConfirmModal.classList.remove('hidden');
+            }
         });
 
+        // --- Confirmation Modal Handlers ---
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteConfirmModal.classList.add('hidden');
+            currentEditKey = null;
+            currentEditType = null;
+        });
+        
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (!currentEditKey || !currentEditType) return;
+            
+            const path = `${currentEditType}s/${currentEditKey}`;
+            remove(ref(db, path))
+                .then(() => {
+                    showToast("Post deleted successfully.");
+                })
+                .catch(err => showToast(err.message, true))
+                .finally(() => {
+                    deleteConfirmModal.classList.add('hidden');
+                    currentEditKey = null;
+                    currentEditType = null;
+                });
+        });
+
+        // --- Friend Request Modal Handlers ---
         chatFeed.addEventListener('click', (e) => {
             if (e.target.classList.contains('add-friend-btn')) {
                 const name = e.target.dataset.name;
                 const friendUid = e.target.dataset.uid;
                 
-                if (friendUid === myUid) return; // Can't add yourself
-                
+                if (friendUid === myUid) return;
                 if (myFriendsList.find(f => f.uid === friendUid)) {
                     showToast("You're already friends!");
                     return;
@@ -1095,10 +1272,6 @@
             const name = confirmFriendBtn.dataset.name;
             const friendUid = confirmFriendBtn.dataset.uid;
             
-            // This is also complex. In a real app:
-            // 1. Write to `users/${myUid}/friends/${friendUid}` { status: 'pending_sent' }
-            // 2. Write to `users/${friendUid}/friends/${myUid}` { status: 'pending_received' }
-            // For now, we just add to our local list.
             myFriendsList.push({ uid: friendUid, name: name, status: 'pending', dms: [] });
             renderActivityScreen();
             addFriendModal.classList.add('hidden');
@@ -1149,7 +1322,6 @@
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     showToast("Login Successful!");
-                    // onAuthStateChanged will handle the rest
                 })
                 .catch((error) => showToast(error.message, true));
         });
@@ -1172,12 +1344,10 @@
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    // Save the username to the database
                     set(ref(db, 'users/' + user.uid), {
                         username: username
                     }).then(() => {
                         showToast("Account created successfully!");
-                        // onAuthStateChanged will handle the rest
                     });
                 })
                 .catch((error) => showToast(error.message, true));
@@ -1190,7 +1360,6 @@
         saveUsernameBtn.addEventListener('click', () => {
             const newName = usernameInput.value.trim();
             if (newName && newName.length > 2 && myUid) {
-                // Save new username to database
                 set(ref(db, 'users/' + myUid), {
                     username: newName
                 }).then(() => {
@@ -1218,22 +1387,31 @@
                 if (snapshot.exists()) {
                     myUsername = snapshot.val().username;
                 } else {
-                    // This case might happen if signup fails to set username
                     myUsername = getRandomName();
                 }
             });
             
             // 2. Listen for new Hustles
             onValue(ref(db, 'hustles'), (snapshot) => {
+                hustleDatabase = [];
                 const data = snapshot.val();
-                hustleDatabase = data ? Object.values(data) : [];
+                if (data) {
+                    for (const key in data) {
+                        hustleDatabase.push({ key: key, ...data[key] });
+                    }
+                }
                 renderHustleFeed();
             });
             
             // 3. Listen for new Trades
             onValue(ref(db, 'trades'), (snapshot) => {
+                tradeDatabase = [];
                 const data = snapshot.val();
-                tradeDatabase = data ? Object.values(data) : [];
+                if (data) {
+                    for (const key in data) {
+                        tradeDatabase.push({ key: key, ...data[key] });
+                    }
+                }
                 renderTradeFeed();
             });
             
@@ -1245,8 +1423,7 @@
             });
             
             // 5. Listen for user's own data (friends, requests)
-            // This is where you would load `myFriendsList` and `myTradeRequests`
-            // For now, we'll keep them local to the prototype.
+            // (This part would be built out in a real app)
             renderActivityScreen();
         }
 
@@ -1264,6 +1441,17 @@
                     // User is signed out
                     myUid = null;
                     myUsername = getRandomName();
+                    // Reset local data
+                    hustleDatabase = [];
+                    tradeDatabase = [];
+                    chatMessages = [];
+                    myFriendsList = [];
+                    myTradeRequests = [];
+                    // Render empty feeds
+                    renderHustleFeed();
+                    renderTradeFeed();
+                    renderChatFeed();
+                    renderActivityScreen();
                     showScreen('login-screen');
                 }
             });
