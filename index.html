@@ -388,8 +388,12 @@
                 <button id="trade-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent active" data-target="trade-requests-tab">
                     Trade Requests
                 </button>
-                <button id="friends-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friends-tab">
-                    Friends
+                <!-- NEW: Friend Requests Tab -->
+                <button id="friend-requests-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-requests-tab">
+                    Friend Requests
+                </button>
+                <button id="friend-list-tab-btn" class="tab-btn flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-4 border-transparent" data-target="friend-list-tab">
+                    Friend List
                 </button>
             </div>
             
@@ -400,8 +404,13 @@
                     <!-- Trade requests will be dynamically added here -->
                     <p id="no-trade-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No trade requests sent yet.</p>
                 </div>
-                <!-- Friends Tab -->
-                <div id="friends-tab" class="tab-content space-y-4 hidden">
+                <!-- NEW: Friend Requests Tab Content -->
+                <div id="friend-requests-tab" class="tab-content space-y-4 hidden">
+                    <!-- Friend requests will be dynamically added here -->
+                    <p id="no-friend-requests" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No new friend requests.</p>
+                </div>
+                <!-- Friend List Tab -->
+                <div id="friend-list-tab" class="tab-content space-y-4 hidden">
                     <!-- Friends will be dynamically added here -->
                     <p id="no-friends" class="text-gray-500 dark:text-gray-400 text-center p-4 hidden">No friends added yet. Add friends from Campus Chat!</p>
                 </div>
@@ -560,7 +569,8 @@
         let myUsername = "Anonymous Panda"; // Default name
         let myUid = null; // User's unique ID
         let myTradeRequests = []; // Stores { id, subject, status, contact, image }
-        let myFriendsList = []; // Stores { name, status, dms: [] }
+        let myFriendList = []; // RENAMED
+        let myReceivedFriendRequests = []; // NEW
         
         // --- Local Arrays (cleared on render) ---
         let hustleDatabase = [];
@@ -665,11 +675,16 @@
         // Activity Screen
         const activityScreen = document.getElementById('activity-screen');
         const tradeRequestsTabBtn = document.getElementById('trade-requests-tab-btn');
-        const friendsTabBtn = document.getElementById('friends-tab-btn');
+        const friendsTabBtn = document.getElementById('friend-list-tab-btn'); // Renamed
         const tradeRequestsTab = document.getElementById('trade-requests-tab');
-        const friendsTab = document.getElementById('friends-tab');
+        const friendsTab = document.getElementById('friend-list-tab'); // Renamed
         const noTradeRequests = document.getElementById('no-trade-requests');
         const noFriends = document.getElementById('no-friends');
+        // NEW: Friend Request Tab
+        const friendRequestsTabBtn = document.getElementById('friend-requests-tab-btn');
+        const friendRequestsTab = document.getElementById('friend-requests-tab');
+        const noFriendRequests = document.getElementById('no-friend-requests');
+
         
         // DM Screen
         const dmScreen = document.getElementById('dm-screen');
@@ -698,7 +713,8 @@
                 screenElement.style.justifyContent = 'center';
             }
             if (screenId === 'activity-screen') {
-                showActivityTab('trade-requests-tab');
+                // Default to the first tab, trade-requests-tab
+                showActivityTab('trade-requests-tab'); 
             }
             if (screenId === 'settings-screen') {
                 usernameInput.value = myUsername;
@@ -863,7 +879,8 @@
 
         function renderActivityScreen() {
             renderTradeRequests();
-            renderFriendsList();
+            renderFriendRequests(); // NEW
+            renderFriendList(); // RENAMED
         }
         
         function renderTradeRequests() {
@@ -889,26 +906,60 @@
                 tradeRequestsTab.appendChild(card);
             });
         }
+
+        // NEW: Render Friend Requests (Received)
+        function renderFriendRequests() {
+            friendRequestsTab.innerHTML = '';
+            if (myReceivedFriendRequests.length === 0) {
+                noFriendRequests.classList.remove('hidden');
+                return;
+            }
+            noFriendRequests.classList.add('hidden');
+
+            myReceivedFriendRequests.forEach((req) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
+                card.innerHTML = `
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">${req.name}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Wants to be your friend.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="accept-friend-btn w-full bg-green-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-600" data-uid="${req.uid}" data-name="${req.name}">Accept</button>
+                        <button class="decline-friend-btn w-full bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600" data-uid="${req.uid}">Decline</button>
+                    </div>
+                `;
+                friendRequestsTab.appendChild(card);
+            });
+        }
         
-        function renderFriendsList() {
+        function renderFriendList() {
             friendsTab.innerHTML = '';
-            if (myFriendsList.length === 0) {
+            if (myFriendList.length === 0) {
                 noFriends.classList.remove('hidden');
                 return;
             }
             noFriends.classList.add('hidden');
             
-            myFriendsList.forEach((friend, index) => {
+            myFriendList.forEach((friend, index) => {
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between';
+                
+                let statusText = 'Accepted';
+                let statusColor = 'text-green-600 dark:text-green-400';
+                if (friend.status === 'sent') {
+                    statusText = 'Sent';
+                    statusColor = 'text-yellow-600 dark:text-yellow-400';
+                }
+
                 card.innerHTML = `
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">${friend.name}</h3>
-                        <p id="status-friend-${index}" class="text-sm ${friend.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}">
-                            ${friend.status}
+                        <p id="status-friend-${index}" class="text-sm ${statusColor}">
+                            ${statusText}
                         </p>
                     </div>
-                    <button class="dm-btn bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg ${friend.status === 'pending' ? 'hidden' : ''}" data-name="${friend.name}" data-friend-uid="${friend.uid}">
+                    <button class="dm-btn bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg ${friend.status !== 'accepted' ? 'hidden' : ''}" data-name="${friend.name}" data-friend-uid="${friend.uid}">
                         DM
                     </button>
                 `;
@@ -1076,7 +1127,7 @@
             
             // This logic needs to be fully built out with a real DM structure in Firebase
             // For this prototype, we'll just show the message locally
-            const friend = myFriendsList.find(f => f.name === friendName);
+            const friend = myFriendList.find(f => f.name === friendName);
             if (friend) {
                 const newMsg = { user: "Me", message };
                 friend.dms.push(newMsg);
@@ -1126,12 +1177,15 @@
             });
         });
 
+        // --- NEW: Activity Tab Navigation (3 tabs) ---
         tradeRequestsTabBtn.addEventListener('click', () => showActivityTab('trade-requests-tab'));
-        friendsTabBtn.addEventListener('click', () => showActivityTab('friends-tab'));
+        friendRequestsTabBtn.addEventListener('click', () => showActivityTab('friend-requests-tab'));
+        friendsTabBtn.addEventListener('click', () => showActivityTab('friend-list-tab'));
         
         function showActivityTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
             document.getElementById(tabId).classList.remove('hidden');
             document.getElementById(tabId + '-btn').classList.add('active');
         }
@@ -1291,8 +1345,8 @@
                 const friendUid = e.target.dataset.uid;
                 
                 if (friendUid === myUid) return;
-                if (myFriendsList.find(f => f.uid === friendUid)) {
-                    showToast("You're already friends!");
+                if (myFriendList.find(f => f.uid === friendUid)) {
+                    showToast("You're already friends or request is sent!");
                     return;
                 }
                 
@@ -1309,16 +1363,46 @@
             const name = confirmFriendBtn.dataset.name;
             const friendUid = confirmFriendBtn.dataset.uid;
             
-            myFriendsList.push({ uid: friendUid, name: name, status: 'pending', dms: [] });
+            // This is a simulation. A real app would write to the database.
+            myFriendList.push({ uid: friendUid, name: name, status: 'sent', dms: [] });
             renderActivityScreen();
             addFriendModal.classList.add('hidden');
             showToast("Friend Request Sent!");
         });
         
+        // NEW: Accept/Decline Friend Request
+        activityScreen.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // --- ACCEPT FRIEND ---
+            if (target.classList.contains('accept-friend-btn')) {
+                const friendUid = target.dataset.uid;
+                const name = target.dataset.name;
+                
+                // Remove from requests
+                myReceivedFriendRequests = myReceivedFriendRequests.filter(req => req.uid !== friendUid);
+                // Add to friends list
+                myFriendList.push({ uid: friendUid, name: name, status: 'accepted', dms: [] });
+                // Re-render the whole activity screen
+                renderActivityScreen();
+                showToast(`You are now friends with ${name}!`);
+            }
+            
+            // --- DECLINE FRIEND ---
+            if (target.classList.contains('decline-friend-btn')) {
+                const friendUid = target.dataset.uid;
+                // Remove from requests
+                myReceivedFriendRequests = myReceivedFriendRequests.filter(req => req.uid !== friendUid);
+                // Re-render
+                renderActivityScreen();
+                showToast("Request declined.");
+            }
+        });
+        
         friendsTab.addEventListener('click', (e) => {
             if (e.target.classList.contains('dm-btn')) {
                 const name = e.target.dataset.name;
-                const friend = myFriendsList.find(f => f.name === name);
+                const friend = myFriendList.find(f => f.name === name);
                 if (friend) {
                     renderDMScreen(friend);
                     showScreen('dm-screen');
@@ -1461,6 +1545,10 @@
             
             // 5. Listen for user's own data (friends, requests)
             // (This part would be built out in a real app)
+            // NEW: Add a simulated received friend request for demo purposes
+            myReceivedFriendRequests = [
+                { uid: 'dummyUser123', name: 'Curious Koala', status: 'received' }
+            ];
             renderActivityScreen();
         }
 
@@ -1482,8 +1570,9 @@
                     hustleDatabase = [];
                     tradeDatabase = [];
                     chatMessages = [];
-                    myFriendsList = [];
+                    myFriendList = [];
                     myTradeRequests = [];
+                    myReceivedFriendRequests = []; // Clear simulated requests
                     // Render empty feeds
                     renderHustleFeed();
                     renderTradeFeed();
